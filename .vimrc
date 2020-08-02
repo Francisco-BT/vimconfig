@@ -22,6 +22,7 @@ set showmatch
 set noerrorbells
 set incsearch
 set number 
+set clipboard+=unnamed,unnamedplus
 
 
 " Switching into buffers
@@ -35,6 +36,11 @@ autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
 
 let mapleader=","
+
+if has("gui_running")
+	autocmd GUIEnter * simalt ~x " Maximi gvim at start
+endif
+
 
 " Plugins
 call plug#begin('~/.vim/plugged')

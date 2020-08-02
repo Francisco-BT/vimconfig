@@ -50,7 +50,7 @@ Plug 'Shougo/echodoc'
 Plug 'sheerun/vim-polyglot'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 Plug 'Townk/vim-autoclose'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'MattesGroeger/vim-bookmarks'

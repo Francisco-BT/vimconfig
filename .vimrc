@@ -23,7 +23,7 @@ set novisualbell
 set incsearch
 set number 
 set clipboard+=unnamed,unnamedplus
-
+set autoread
 
 " Switching into buffers
 map <C-N> :bnext<CR>

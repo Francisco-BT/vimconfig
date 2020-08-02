@@ -20,6 +20,8 @@ set wildmenu
 set nowrap
 set number
 set showmatch
+set noerrorbells
+set incsearch
 
 
 " Switching into buffers
@@ -30,7 +32,4 @@ imap <C-P> <Esc>:bprev<CR>i
 
 let mapleader=","
 
-" Toggle relative number
-autocmd InsertEnter * :set relativenumber
-autocmd InsertLeave * :set norelativenumber
 colorscheme desert

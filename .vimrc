@@ -46,7 +46,6 @@ endif
 " Plugins
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree'
-Plug 'Shougo/echodoc'
 Plug 'sheerun/vim-polyglot'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -64,7 +63,6 @@ Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
 Plug 'tmsvg/pear-tree'
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-surround'

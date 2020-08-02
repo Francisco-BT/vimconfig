@@ -10,5 +10,6 @@ Plug 'Townk/vim-autoclose'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
+Plug 'airblade/vim-gitgutter'
 
 call plug#end()

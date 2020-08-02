@@ -11,5 +11,6 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
 Plug 'airblade/vim-gitgutter'
+Plug 'neoclide/coc.nvim'
 
 call plug#end()

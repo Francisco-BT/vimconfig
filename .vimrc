@@ -1,6 +1,5 @@
 filetype indent plugin on                   "
 syntax on
-silent! colorscheme dim
 set background=dark
 set encoding=utf-8
 set backspace=indent,eol,start
@@ -20,6 +19,7 @@ set wildmenu
 set nowrap
 set showmatch
 set noerrorbells
+set novisualbell
 set incsearch
 set number 
 set clipboard+=unnamed,unnamedplus
@@ -38,7 +38,8 @@ autocmd InsertLeave * :set relativenumber
 let mapleader=","
 
 if has("gui_running")
-	autocmd GUIEnter * simalt ~x " Maximi gvim at start
+	autocmd GUIEnter * simalt ~x " Naximize gvim at start
+	autocmd GUIEnter * set vb t_vb=
 endif
 
 
@@ -68,4 +69,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
+Plug 'morhetz/gruvbox'
 call plug#end()
+
+silent! colorscheme gruvbox

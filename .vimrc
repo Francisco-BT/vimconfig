@@ -34,6 +34,8 @@ imap <C-P> <Esc>:bprev<CR>i
 " Toggle relative numbers
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
+autocmd bufread,bufnewfile * setlocal signcolumn=yes
+autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 
 let mapleader=","
 

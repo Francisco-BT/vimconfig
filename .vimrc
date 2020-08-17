@@ -70,6 +70,7 @@ Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'morhetz/gruvbox'
+Plug 'Yggdroot/indentLine'
 call plug#end()
 
 silent! colorscheme gruvbox

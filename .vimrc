@@ -25,12 +25,6 @@ set number
 set clipboard+=unnamed,unnamedplus
 set autoread
 
-" Switching into buffers
-map <C-N> :bnext<CR>
-map <C-P> :bprev<CR>
-imap <C-N> <Esc>:bnext<CR>i
-imap <C-P> <Esc>:bprev<CR>i
-
 " Toggle relative numbers
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
@@ -42,6 +36,7 @@ let mapleader=","
 if has("gui_running")
 	autocmd GUIEnter * simalt ~x " Naximize gvim at start
 	autocmd GUIEnter * set vb t_vb=
+	set guifont=Fantasque_Sans_Mono:h10:b:cANSI:qDRAFT
 endif
 
 

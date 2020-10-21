@@ -72,6 +72,7 @@ Plug 'Yggdroot/indentLine'
 Plug 'easymotion/vim-easymotion'
 Plug 'preservim/nerdcommenter'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'maxmellon/vim-jsx-pretty'
 call plug#end()
 
 silent! colorscheme gruvbox

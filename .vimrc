@@ -61,7 +61,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
-Plug 'tmsvg/pear-tree'
+"Plug 'tmsvg/pear-tree'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
@@ -73,6 +73,7 @@ Plug 'easymotion/vim-easymotion'
 Plug 'preservim/nerdcommenter'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'maxmellon/vim-jsx-pretty'
+Plug 'jiangmiao/auto-pairs'
 call plug#end()
 
 silent! colorscheme gruvbox

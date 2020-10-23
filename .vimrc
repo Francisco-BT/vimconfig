@@ -39,8 +39,6 @@ if has("gui_running")
 	set guifont=Fantasque_Sans_Mono:h10:b:cANSI:qDRAFT
 endif
 
-set diffopt+=vertical
-
 " Plugins
 call plug#begin('~/.vim/plugged')
 " Syntax

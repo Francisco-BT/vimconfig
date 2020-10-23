@@ -42,33 +42,43 @@ endif
 
 " Plugins
 call plug#begin('~/.vim/plugged')
-Plug 'scrooloose/nerdtree'
+" Syntax
 Plug 'sheerun/vim-polyglot'
+Plug 'HerringtonDarkholme/yats.vim'
+Plug 'yuezk/vim-js'
+Plug 'maxmellon/vim-jsx-pretty'
+
+" IDE
+Plug 'scrooloose/nerdtree'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
-Plug 'airblade/vim-gitgutter'
 Plug 'neoclide/coc.nvim'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
-"Plug 'tmsvg/pear-tree'
-Plug 'AndrewRadev/splitjoin.vim'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-obsession'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-unimpaired'
-Plug 'morhetz/gruvbox'
-Plug 'Yggdroot/indentLine'
 Plug 'easymotion/vim-easymotion'
 Plug 'preservim/nerdcommenter'
 Plug 'terryma/vim-multiple-cursors'
-Plug 'maxmellon/vim-jsx-pretty'
 Plug 'jiangmiao/auto-pairs'
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-unimpaired'
+Plug 'Yggdroot/indentLine'
+"Plug 'tmsvg/pear-tree'
+
+" Git
+Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-fugitive'
+
+" Theme and UI
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'morhetz/gruvbox'
+
 call plug#end()
 
 silent! colorscheme gruvbox

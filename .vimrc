@@ -39,6 +39,7 @@ if has("gui_running")
 	set guifont=Fantasque_Sans_Mono:h10:b:cANSI:qDRAFT
 endif
 
+set diffopt+=vertical
 
 " Plugins
 call plug#begin('~/.vim/plugged')
@@ -71,7 +72,7 @@ Plug 'Yggdroot/indentLine'
 "Plug 'tmsvg/pear-tree'
 
 " Git
-Plug 'airblade/vim-gitgutter'
+Plug 'mhinz/vim-signify'
 Plug 'tpope/vim-fugitive'
 
 " Theme and UI

@@ -9,3 +9,4 @@ let g:ale_fixers = {
     \ 'javascript': ['prettier', 'eslint'],
     \ 'typescript': ['prettier', 'eslint', 'tslint']
     \ }
+let g:ale_javascript_prettier_options = '--single-quote'

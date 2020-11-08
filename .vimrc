@@ -24,6 +24,9 @@ set incsearch
 set number 
 set clipboard+=unnamed,unnamedplus
 set autoread
+set cursorline
+set ruler
+set list listchars=tab:\ \ ,trail:· 				" Highlight tailing whitespace
 
 " Toggle relative numbers
 autocmd InsertEnter * :set norelativenumber

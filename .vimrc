@@ -27,11 +27,11 @@ set autoread
 set cursorline
 set ruler
 set list listchars=tab:\ \ ,trail:· 				" Highlight tailing whitespace
+set signcolumn=yes
 
 " Toggle relative numbers
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
-autocmd bufread,bufnewfile * setlocal signcolumn=yes
 autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 
 let mapleader=","

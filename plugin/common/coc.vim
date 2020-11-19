@@ -24,3 +24,10 @@ nmap <leader>a <Plug>(coc-codeaction-selected)
 
 " Highlight symbol under cursor on CursorHold
 autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Install extension automatically
+let g:coc_global_extensions = [
+  \ 'coc-tsserver',
+  \ 'coc-json',
+  \ 'coc-css'
+  \ ]

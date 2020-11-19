@@ -34,6 +34,12 @@ autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
 autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 
+let g:jsx_ext_required = 0
+" Javascrip
+autocmd BufRead *.js set filetype=javascript.jsx
+autocmd BufRead *.jsx set filetype=javascript.jsx
+augroup filetype javascript syntax=javascript
+
 let mapleader=","
 
 if has("gui_running")

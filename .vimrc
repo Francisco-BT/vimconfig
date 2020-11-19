@@ -58,7 +58,7 @@ Plug 'junegunn/fzf.vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
-Plug 'neoclide/coc.nvim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
 Plug 'easymotion/vim-easymotion'

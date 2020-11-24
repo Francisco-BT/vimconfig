@@ -1,5 +1,7 @@
-filetype indent plugin on                   "
+let mapleader=","
+filetype indent plugin on
 syntax on
+set mouse=a
 set background=dark
 set encoding=utf-8
 set backspace=indent,eol,start
@@ -21,29 +23,22 @@ set showmatch
 set noerrorbells
 set novisualbell
 set incsearch
-set number 
 set clipboard+=unnamed,unnamedplus
 set autoread
 set cursorline
 set ruler
 set list listchars=tab:\ \ ,trail:· 				" Highlight tailing whitespace
 set signcolumn=yes
+set number relativenumber
 
-" Toggle relative numbers
-autocmd InsertEnter * :set norelativenumber
-autocmd InsertLeave * :set relativenumber
-autocmd filetype tagbar,nerdtree setlocal signcolumn=no
-
-let g:jsx_ext_required = 0
-" Javascrip
+" Javascript
 autocmd BufRead *.js set filetype=javascript.jsx
 autocmd BufRead *.jsx set filetype=javascript.jsx
 augroup filetype javascript syntax=javascript
-
-let mapleader=","
+autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 
 if has("gui_running")
-	autocmd GUIEnter * simalt ~x " Naximize gvim at start
+	autocmd GUIEnter * simalt ~x " Maximize gvim at start
 	autocmd GUIEnter * set vb t_vb=
 	set guifont=Fantasque_Sans_Mono:h10:b:cANSI:qDRAFT
 endif
@@ -76,7 +71,7 @@ Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
-"Plug 'tmsvg/pear-tree'
+Plug 'jeffkreeftmeijer/vim-numbertoggle'
 
 " Git
 Plug 'mhinz/vim-signify'

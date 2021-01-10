@@ -72,7 +72,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
-Plug 'vim-test/vim-test'
+Plug 'leafgarland/typescript-vim'
 
 " Git
 Plug 'mhinz/vim-signify'

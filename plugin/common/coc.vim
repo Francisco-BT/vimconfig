@@ -20,7 +20,8 @@ let g:coc_global_extensions = [
   \ 'coc-tsserver',
   \ 'coc-json',
   \ 'coc-css',
-  \ 'coc-html'
+  \ 'coc-html',
+  \ 'coc-spell-checker'
   \ ]
 
 " Show documentation

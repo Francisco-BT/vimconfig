@@ -12,4 +12,4 @@ command! -bang -nargs=? -complete=dir Files
 " maps
 map <Leader>p :Files<CR>
 map <Leader>b :Buffer<CR>
-map <Leader>nf :GFiles<CR>
+map <Leader>gf :GFiles<CR>

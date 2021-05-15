@@ -1,5 +1,5 @@
 let g:bookmark_no_default_key_mappings=1
-nmap <Leader>mm <Plug>BookmarkToggle
+nmap <Leader>mt <Plug>BookmarkToggle
 nmap <Leader>mi <Plug>BookmarkAnnotate
 nmap <Leader>ma <Plug>BookmarkShowAll
 nmap <Leader>mn <Plug>BookmarkNext

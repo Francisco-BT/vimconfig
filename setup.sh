@@ -29,11 +29,9 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 
 echo "You can search files using Ctrl + T"
 echo "\n Set up vim and zsh config"
-git clone https://github.com/Francisco-BT/vimconfig.git
 
-cd vimconfig 
 cp .vimrc ~/.vimrc
-cp .zsrhc ~/.zsrhc
+cp .zshrc ~/.zshrc
 cp .tmux.conf ~/.tmux.conf
 
 mkdir ~/.vim
@@ -42,12 +40,16 @@ cp -r plugin ~/.vim
 
 cd ..
 
+echo "Reload zsh config"
+source ~/.zshrc
+
 echo "Installing yarn"
-sudo npm install --global yarn
+npm install --global yarn
 
 echo "Setup vimplug"
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-	    https://raw.githubusercontent.com/junegunn/vim-plug/mast
+	    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
 
 echo "Finished setup. You can use https://github.com/denysdovhan/spaceship-prompt as your oh-my-zsh theme"
 echo "Run :PlugInstall when you executed vim"
@@ -56,5 +58,21 @@ echo "Add git utils alias"
 git config --global alias.st status
 git config --global alias.ps push
 git config --global alias.ch checkout
+git config --global alias.pl pull
+
+echo "Installing neovim"
+sudo apt install neovim
+
+echo "Creating confguration between vim and neovim"
+
+mkdir -p ~/.config/nvim
+touch ~/.config/nvim/init.vim
+
+echo "set runtimepath^=~/.vim runtimepath+=~/.vim/after" >> ~/.config/nvim/init.vim
+echo "let &packpath=&runtimepath" >> ~/.config/nvim/init.vim
+echo "source ~/.vimrc" >> ~/.config/nvim/init.vim
+
 
 echo "Script ended"
+
+

@@ -21,7 +21,8 @@ let g:coc_global_extensions = [
   \ 'coc-json',
   \ 'coc-css',
   \ 'coc-html',
-  \ 'coc-spell-checker'
+  \ 'coc-spell-checker',
+  \ 'coc-tailwindcss',
   \ ]
 
 " Show documentation

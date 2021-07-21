@@ -31,6 +31,10 @@ set list listchars=tab:\ \ ,trail:· 				" Highlight tailing whitespace
 set signcolumn=yes
 set number relativenumber
 
+" Enable 256 term colors for neovim
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+set termguicolors
+
 " Javascript
 autocmd BufRead *.js set filetype=javascript.jsx
 autocmd BufRead *.jsx set filetype=javascript.jsx

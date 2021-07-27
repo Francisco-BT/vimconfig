@@ -7,6 +7,7 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <leader> rn <Plug>(coc-rename)
 
 " Mappings for coc-spell-checker
 vmap <leader>a <Plug>(coc-codeaction-selected)
@@ -17,6 +18,7 @@ autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Install extension automatically
 let g:coc_global_extensions = [
+  \ 'coc-jedi',
   \ 'coc-tsserver',
   \ 'coc-json',
   \ 'coc-css',

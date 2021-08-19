@@ -10,6 +10,9 @@ chsh -s `which zsh`
 echo "Make sure the system has curl"
 sudo apt install curl
 
+echo "Make sure kitty is installed"
+sudo pat install kitty
+
 echo "Installing oh-my-zsh"
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
@@ -67,6 +70,10 @@ echo "Creating confguration between vim and neovim"
 
 mkdir -p ~/.config/nvim
 touch ~/.config/nvim/init.vim
+
+echo "Creating configuration to kitty"
+mkdir -p ~/.config/kitty
+cp ./kitty.conf ~/.config/kitty/
 
 cat /dev/null > ~/.config/nvim/init.vim
 echo "set runtimepath^=~/.vim runtimepath+=~/.vim/after" >> ~/.config/nvim/init.vim

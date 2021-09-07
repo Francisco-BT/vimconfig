@@ -7,6 +7,7 @@ let g:ale_linters = {
     \ 'c': ['clang'],
     \ 'javascript': ['eslint'],
     \ 'typescript': ['eslint', 'prettier'],
+    \ 'json': ['eslint'],
     \ }
 let g:ale_fixers = {
     \ 'python': ['yapf'],
@@ -14,5 +15,6 @@ let g:ale_fixers = {
     \ 'javascript': [ 'eslint', 'prettier'],
     \ 'typescript': [ 'eslint', 'prettier', 'tslint'],
     \ 'typescriptreact': [ 'eslint', 'prettier', 'tslint'],
+    \ 'json': ['prettier'],
     \ }
 let g:ale_javascript_prettier_options = '--single-quote'

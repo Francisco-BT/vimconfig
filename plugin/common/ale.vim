@@ -11,7 +11,9 @@ let g:ale_linters = {
     \ }
 let g:ale_fixers = {
     \ 'python': ['yapf'],
-    \ 'c': ['clang-format'],
+    \ 'c': ['clang-format'],}
+    \ 'html': ['prettier'],
+    \ 'css': ['prettier'],
     \ 'javascript': [ 'eslint', 'prettier'],
     \ 'typescript': [ 'eslint', 'prettier', 'tslint'],
     \ 'typescriptreact': [ 'eslint', 'prettier', 'tslint'],

@@ -3,7 +3,7 @@
   let s:base00 = ['#1b2b34', '235']
   let s:base01 = ['#343d46', '237']
   let s:base02 = ['#4f5b66', '240']
-  let s:base03 = ['#41596b', '243']
+  let s:base03 = ['#406080', '243']
   let s:base04 = ['#a7adba', '145']
   let s:base05 = ['#c0c5ce', '251']
   let s:base06 = ['#cdd3de', '252']

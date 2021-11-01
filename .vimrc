@@ -58,6 +58,7 @@ Plug 'sheerun/vim-polyglot'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
+Plug 'leafgarland/typescript-vim'
 
 " IDE
 Plug 'scrooloose/nerdtree'
@@ -80,8 +81,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
-Plug 'leafgarland/typescript-vim'
-Plug 'NLKNguyen/papercolor-theme'
+Plug 'tpope/vim-repeat'
 
 " Git
 Plug 'mhinz/vim-signify'
@@ -91,6 +91,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'morhetz/gruvbox'
+Plug 'NLKNguyen/papercolor-theme'
 
 call plug#end()
 

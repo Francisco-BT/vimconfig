@@ -81,6 +81,7 @@ Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'leafgarland/typescript-vim'
+Plug 'NLKNguyen/papercolor-theme'
 
 " Git
 Plug 'mhinz/vim-signify'
@@ -93,4 +94,4 @@ Plug 'morhetz/gruvbox'
 
 call plug#end()
 
-silent! colorscheme gruvbox
+silent! colorscheme papercolor

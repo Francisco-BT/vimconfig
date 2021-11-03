@@ -82,6 +82,7 @@ Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'tpope/vim-repeat'
+Plug 'leafOfTree/vim-matchtag'
 
 " Git
 Plug 'mhinz/vim-signify'

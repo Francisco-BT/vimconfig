@@ -14,7 +14,7 @@ set undofile
 set undodir=~/.vim/undodir
 set autoindent
 set colorcolumn=80
-set fillchars+=vert:\┊
+set fillchars+=vert:\'
 set noshowmode
 set laststatus=1
 set wildmenu
@@ -41,10 +41,18 @@ autocmd BufRead *.jsx set filetype=javascript.jsx
 augroup filetype javascript syntax=javascript
 autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 
+" Move Lines
+nnoremap <A-j> :m .+1<Return>==
+nnoremap <A-k> :m .-2<Return>==
+vnoremap <A-j> :m '>+1<Return>gv=gv
+vnoremap <A-k> :m '<-2<Return>gv=gv
+
+hi htmlEndTag  guifg=#90b0d1 gui=NONE
+
 if has("gui_running")
 	autocmd GUIEnter * simalt ~x " Maximize gvim at start
 	autocmd GUIEnter * set vb t_vb=
-	set guifont=IBM_Plex_Mono:h10:cANSI:qDRAFT
+	set guifont=IBM_Plex_Mono:h11:cANSI:qDRAFT
 	set guioptions-=m  "menu bar
 	set guioptions-=T  "toolbar
 	set guioptions-=r  "scrollbar right
@@ -58,22 +66,23 @@ Plug 'sheerun/vim-polyglot'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
-Plug 'leafgarland/typescript-vim'
+Plug 'pantharshit00/vim-prisma'
+Plug 'jxnblk/vim-mdx-js'
 
 " IDE
 Plug 'scrooloose/nerdtree'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'editorconfig/editorconfig-vim'
-Plug 'MattesGroeger/vim-bookmarks'
+"Plug 'editorconfig/editorconfig-vim'
+"Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
-Plug 'easymotion/vim-easymotion'
+"Plug 'easymotion/vim-easymotion'
 Plug 'preservim/nerdcommenter'
-Plug 'terryma/vim-multiple-cursors'
+"Plug 'terryma/vim-multiple-cursors'
 Plug 'jiangmiao/auto-pairs'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'tpope/vim-obsession'
@@ -81,6 +90,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'Yggdroot/indentLine'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
+Plug 'leafgarland/typescript-vim'
 Plug 'tpope/vim-repeat'
 Plug 'leafOfTree/vim-matchtag'
 
@@ -91,9 +101,24 @@ Plug 'tpope/vim-fugitive'
 " Theme and UI
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'morhetz/gruvbox'
-Plug 'NLKNguyen/papercolor-theme'
+"Plug 'morhetz/gruvbox'
+"Plug 'NLKNguyen/papercolor-theme'
+"Plug 'wincent/terminus'
+Plug 'chriskempson/base16-vim'
 
 call plug#end()
 
-silent! colorscheme papercolor
+packadd! dracula_pro
+let g:dracula_italic = 1
+let g:dracula_colorterm = 0
+let base16colorspace=256
+
+let g:PaperColor_Theme_Options = {
+  \   'theme': {
+  \     'default.dark': {
+  \       'allow_italic': 1
+  \     }
+  \   }
+  \ }
+
+silent! colorscheme base16-dracula

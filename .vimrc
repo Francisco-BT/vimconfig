@@ -27,7 +27,7 @@ set clipboard+=unnamed,unnamedplus
 set autoread
 set cursorline
 set ruler
-set list listchars=tab:\ \ ,trail:· 				" Highlight tailing whitespace
+set list listchars=tab:▸\ ,trail:· 				" Highlight tailing whitespace
 set signcolumn=yes
 set number relativenumber
 

@@ -101,6 +101,8 @@ Plug 'tpope/vim-fugitive'
 " Theme and UI
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'ryanoasis/vim-devicons'
 "Plug 'morhetz/gruvbox'
 "Plug 'NLKNguyen/papercolor-theme'
 "Plug 'wincent/terminus'

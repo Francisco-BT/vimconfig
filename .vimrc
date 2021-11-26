@@ -106,6 +106,8 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 "Plug 'NLKNguyen/papercolor-theme'
 "Plug 'wincent/terminus'
 Plug 'chriskempson/base16-vim'
+Plug 'ryanoasis/vim-devicons'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 call plug#end()
 

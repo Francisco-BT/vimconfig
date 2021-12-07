@@ -1,3 +1,3 @@
 nnoremap <Leader>G :G<cr>
-nnoremap <Leader>gp :Gpush<cr>
-nnoremap <Leader>gl :Gpull<cr>
+nnoremap <Leader>gp :G push<cr>
+nnoremap <Leader>gl :G pull<cr>

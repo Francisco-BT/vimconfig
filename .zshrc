@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/onephase/.oh-my-zsh"
+export ZSH="/home/$(whoami)/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -104,7 +104,7 @@ alias v=nvim
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-fpath=($fpath "/home/onephase/.zfunctions")
+fpath=($fpath "/home/$(whoami)/.zfunctions")
 
   # Set Spaceship ZSH as a prompt
   autoload -U promptinit; promptinit

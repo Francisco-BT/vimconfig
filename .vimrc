@@ -74,15 +74,12 @@ Plug 'scrooloose/nerdtree'
 Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-"Plug 'editorconfig/editorconfig-vim'
-"Plug 'MattesGroeger/vim-bookmarks'
 Plug 'alvan/vim-closetag'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'Asheq/close-buffers.vim'
 Plug 'mattn/emmet-vim' 
-"Plug 'easymotion/vim-easymotion'
+Plug 'easymotion/vim-easymotion'
 Plug 'preservim/nerdcommenter'
-"Plug 'terryma/vim-multiple-cursors'
 Plug 'jiangmiao/auto-pairs'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'tpope/vim-obsession'
@@ -93,6 +90,9 @@ Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'leafgarland/typescript-vim'
 Plug 'tpope/vim-repeat'
 Plug 'leafOfTree/vim-matchtag'
+"Plug 'terryma/vim-multiple-cursors'
+"Plug 'editorconfig/editorconfig-vim'
+"Plug 'MattesGroeger/vim-bookmarks'
 
 " Git
 Plug 'mhinz/vim-signify'
@@ -102,26 +102,14 @@ Plug 'tpope/vim-fugitive'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'Xuyuanp/nerdtree-git-plugin'
-"Plug 'morhetz/gruvbox'
-"Plug 'NLKNguyen/papercolor-theme'
-"Plug 'wincent/terminus'
 Plug 'chriskempson/base16-vim'
 Plug 'ryanoasis/vim-devicons'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+"Plug 'morhetz/gruvbox'
+"Plug 'wincent/terminus'
 
 call plug#end()
 
-packadd! dracula_pro
-let g:dracula_italic = 1
-let g:dracula_colorterm = 0
 let base16colorspace=256
-
-let g:PaperColor_Theme_Options = {
-  \   'theme': {
-  \     'default.dark': {
-  \       'allow_italic': 1
-  \     }
-  \   }
-  \ }
 
 silent! colorscheme base16-dracula

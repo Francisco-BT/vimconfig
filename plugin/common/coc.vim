@@ -9,9 +9,9 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 nmap <leader> cr <Plug>(coc-rename)
 " Remap keys for applying codeAction to the current buffer.
-nmap <leader> a <Plug>(coc-codeaction)
+nmap <leader>a <Plug>(coc-codeaction)
 " Mappings for coc-spell-checker
-vmap <leader> a <Plug>(coc-codeaction-selected)
+vmap <leader>a <Plug>(coc-codeaction-selected)
 " nmap <leader>a <Plug>(coc-codeaction-selected)
 " Apply AutoFix to problem on the current line.
 " nmap <leader> qf <Plug>(coc-fix-current)

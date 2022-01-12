@@ -1,4 +1,8 @@
 {
-	"diagnostic.infoSign": "⚠️",
-	"diagnostic.errorSign": "❌",
+  "diagnostic.infoSign": "⚠️",
+  "diagnostic.errorSign": "❌",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  }
 }

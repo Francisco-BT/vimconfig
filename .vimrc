@@ -35,80 +35,18 @@ set number relativenumber
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set termguicolors
 
-" Javascript
-autocmd BufRead *.js set filetype=javascript.jsx
-autocmd BufRead *.jsx set filetype=javascript.jsx
-augroup filetype javascript syntax=javascript
-autocmd filetype tagbar,nerdtree setlocal signcolumn=no
-
-" Move Lines
-nnoremap <A-j> :m .+1<Return>==
-nnoremap <A-k> :m .-2<Return>==
-vnoremap <A-j> :m '>+1<Return>gv=gv
-vnoremap <A-k> :m '<-2<Return>gv=gv
-
 hi htmlEndTag  guifg=#90b0d1 gui=NONE
 
-if has("gui_running")
-	autocmd GUIEnter * simalt ~x " Maximize gvim at start
-	autocmd GUIEnter * set vb t_vb=
-	set guifont=IBM_Plex_Mono:h11:cANSI:qDRAFT
-	set guioptions-=m  "menu bar
-	set guioptions-=T  "toolbar
-	set guioptions-=r  "scrollbar right
-	set guioptions-=L  "scrollbar left
+
+if has("win64") || has("win32") || has("win16")
+	source ~/vimconfig/config/autocomands.vim
+	source ~/vimconfig/config/maps.vim
+	source ~/vimconfig/config/plugins.vim
+else
+	source ~/.vim/config/autocomands.vim
+	source ~/.vim/config/maps.vim
+	source ~/.vim/config/plugins.vim
 endif
-
-" Plugins
-call plug#begin('~/.vim/plugged')
-" Syntax
-Plug 'sheerun/vim-polyglot'
-Plug 'HerringtonDarkholme/yats.vim'
-Plug 'yuezk/vim-js'
-Plug 'maxmellon/vim-jsx-pretty'
-Plug 'pantharshit00/vim-prisma'
-Plug 'jxnblk/vim-mdx-js'
-
-" IDE
-Plug 'scrooloose/nerdtree'
-Plug 'dense-analysis/ale'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
-Plug 'alvan/vim-closetag'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'Asheq/close-buffers.vim'
-Plug 'mattn/emmet-vim' 
-Plug 'easymotion/vim-easymotion'
-Plug 'preservim/nerdcommenter'
-Plug 'jiangmiao/auto-pairs'
-Plug 'AndrewRadev/splitjoin.vim'
-Plug 'tpope/vim-obsession'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-unimpaired'
-Plug 'Yggdroot/indentLine'
-Plug 'jeffkreeftmeijer/vim-numbertoggle'
-Plug 'leafgarland/typescript-vim'
-Plug 'tpope/vim-repeat'
-Plug 'leafOfTree/vim-matchtag'
-"Plug 'terryma/vim-multiple-cursors'
-"Plug 'editorconfig/editorconfig-vim'
-"Plug 'MattesGroeger/vim-bookmarks'
-
-" Git
-Plug 'mhinz/vim-signify'
-Plug 'tpope/vim-fugitive'
-
-" Theme and UI
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'chriskempson/base16-vim'
-Plug 'ryanoasis/vim-devicons'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-"Plug 'morhetz/gruvbox'
-"Plug 'wincent/terminus'
-
-call plug#end()
 
 let base16colorspace=256
 

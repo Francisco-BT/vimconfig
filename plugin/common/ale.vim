@@ -5,9 +5,9 @@ let g:ale_linter_aliases = {'typescriptreact': 'typescript'}
 let g:ale_linters = {
     \ 'python': ['flake8', 'pylint'],
     \ 'c': ['clang'],
-    \ 'javascript': ['eslint'],
+    \ 'javascript': ['eslint', 'prettier'],
     \ 'typescript': ['eslint', 'prettier'],
-    \ 'json': ['eslint'],
+    \ 'json': ['eslint', 'prettier'],
     \ }
 let g:ale_fixers = {
     \ 'python': ['yapf'],
@@ -18,5 +18,10 @@ let g:ale_fixers = {
     \ 'typescript': [ 'eslint', 'prettier', 'tslint'],
     \ 'typescriptreact': [ 'eslint', 'prettier', 'tslint'],
     \ 'json': ['prettier'],
+    \ 'jsonc': ['prettier'],
     \ }
-let g:ale_javascript_prettier_options = '--single-quote'
+"let g:ale_javascript_prettier_options = '--single-quote'
+
+" mapping to move between errors
+nmap <silent> [g <Plug>(ale_previous_wrap)
+nmap <silent> ]g <Plug>(ale_next_wrap)

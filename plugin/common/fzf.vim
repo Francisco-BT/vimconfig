@@ -13,3 +13,4 @@ command! -bang -nargs=? -complete=dir Files
 map <Leader>p :Files<CR>
 map <Leader>b :Buffer<CR>
 map <Leader>gf :GFiles<CR>
+map <Leader>ag :Ag<CR>

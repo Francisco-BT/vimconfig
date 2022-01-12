@@ -1,17 +1,20 @@
 inoremap <silent><expr> <c-space> coc#refresh()
 
 " Navigation for code
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> <C-k> <Plug>(coc-diagnostic-prev)
+nmap <silent> <C-j> <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-nmap <leader> rn <Plug>(coc-rename)
-
+nmap <leader> cr <Plug>(coc-rename)
+" Remap keys for applying codeAction to the current buffer.
+nmap <leader> a <Plug>(coc-codeaction)
 " Mappings for coc-spell-checker
-vmap <leader>a <Plug>(coc-codeaction-selected)
-nmap <leader>a <Plug>(coc-codeaction-selected)
+vmap <leader> a <Plug>(coc-codeaction-selected)
+" nmap <leader>a <Plug>(coc-codeaction-selected)
+" Apply AutoFix to problem on the current line.
+" nmap <leader> qf <Plug>(coc-fix-current)
 
 " Highlight symbol under cursor on CursorHold
 autocmd CursorHold * silent call CocActionAsync('highlight')
@@ -25,7 +28,8 @@ let g:coc_global_extensions = [
   \ 'coc-html',
   \ 'coc-spell-checker',
   \ 'coc-tailwindcss',
-  \ 'coc-tabnine'
+  \ 'coc-tabnine',
+  \ 'coc-emmet'
   \ ]
 
 " Show documentation

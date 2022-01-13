@@ -1,7 +1,7 @@
 let g:ale_sign_error = '❌'
 let g:ale_sign_warning = '🔔'
 let g:ale_fix_on_save = 1
-let g:ale_linter_aliases = {'typescriptreact': 'typescript'}
+let g:ale_linter_aliases = {'typescriptreact': 'typescript', 'javascriptreact': 'javascript'}
 let g:ale_linters = {
     \ 'python': ['flake8', 'pylint'],
     \ 'c': ['clang'],
@@ -15,6 +15,7 @@ let g:ale_fixers = {
     \ 'html': ['prettier'],
     \ 'css': ['prettier'],
     \ 'javascript': [ 'eslint', 'prettier'],
+    \ 'javascriptreact': [ 'eslint', 'prettier', 'tslint'],
     \ 'typescript': [ 'eslint', 'prettier', 'tslint'],
     \ 'typescriptreact': [ 'eslint', 'prettier', 'tslint'],
     \ 'json': ['prettier'],

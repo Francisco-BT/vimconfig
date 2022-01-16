@@ -7,7 +7,7 @@ autocmd filetype tagbar,nerdtree setlocal signcolumn=no
 if has("gui_running")
 	autocmd GUIEnter * simalt ~x " Maximize gvim at start
 	autocmd GUIEnter * set vb t_vb=
-	set guifont=IBM_Plex_Mono:h11:cANSI:qDRAFT
+	set guifont=SauceCodePro_NF:h11:W500:cANSI:qDRAFT
 	set guioptions-=m  "menu bar
 	set guioptions-=T  "toolbar
 	set guioptions-=r  "scrollbar right

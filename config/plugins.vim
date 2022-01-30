@@ -50,6 +50,7 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'chriskempson/base16-vim'
 Plug 'ryanoasis/vim-devicons'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'lifepillar/vim-solarized8'
 "Plug 'wincent/terminus'
 "Plug 'morhetz/gruvbox'
 

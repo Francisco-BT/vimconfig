@@ -49,5 +49,7 @@ else
 endif
 
 let base16colorspace=256
+let g:solarized_statusline="flat"
+let g:solarized_old_cursor_style=1
 
 silent! colorscheme base16-dracula

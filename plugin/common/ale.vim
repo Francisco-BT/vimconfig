@@ -21,8 +21,10 @@ let g:ale_fixers = {
     \ 'json': ['prettier'],
     \ 'jsonc': ['prettier'],
     \ }
-"let g:ale_javascript_prettier_options = '--single-quote'
+let g:ale_javascript_prettier_options = '--single-quote'
+let g:ale_javascript_prettier_use_local_config = 1
+
 
 " mapping to move between errors
-nmap <silent> [g <Plug>(ale_previous_wrap)
-nmap <silent> ]g <Plug>(ale_next_wrap)
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)

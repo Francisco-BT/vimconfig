@@ -39,15 +39,13 @@ hi htmlEndTag  guifg=#90b0d1 gui=NONE
 
 
 if has("win64") || has("win32") || has("win16")
-	source ~/vimconfig/config/autocomands.vim
-	source ~/vimconfig/config/maps.vim
-	source ~/vimconfig/config/plugins.vim
+	source ~/vimfiles/config/autocomands.vim
+	source ~/vimfiles/config/maps.vim
+	source ~/vimfiles/config/plugins.vim
 else
 	source ~/.vim/config/autocomands.vim
 	source ~/.vim/config/maps.vim
 	source ~/.vim/config/plugins.vim
 endif
-
-let base16colorspace=256
 
 silent! colorscheme base16-dracula

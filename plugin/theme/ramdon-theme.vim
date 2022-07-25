@@ -1,5 +1,5 @@
 let g:random_theme_start = 'favorite'
-let g:favorite_gui_fonts = ['SauceCodePro_NF:h11:W500:cANSI:qDRAFT']
+let g:favorite_gui_fonts = ['Operator_Mono_Book:h12:W325:cANSI:qDRAFT']
 let g:favorite_color_schemes = [
       \'base16-circus',
       \'base16-atelier-dune',

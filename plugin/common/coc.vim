@@ -31,6 +31,7 @@ let g:coc_global_extensions = [
   \ 'coc-tabnine',
   \ 'coc-emmet',
   \ 'coc-prettier',
+  \ 'coc-eslint',
   \ ]
 
 " Show documentation

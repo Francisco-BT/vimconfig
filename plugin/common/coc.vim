@@ -29,7 +29,8 @@ let g:coc_global_extensions = [
   \ 'coc-spell-checker',
   \ 'coc-tailwindcss',
   \ 'coc-tabnine',
-  \ 'coc-emmet'
+  \ 'coc-emmet',
+  \ 'coc-prettier',
   \ ]
 
 " Show documentation

@@ -1,8 +1,8 @@
 {
-	"git.confirmSync": false,
-	"playwright.showTrace": true,
-	"window.autoDetectColorScheme": true,
-	"workbench.preferredLightColorTheme": "Dracula Pro (Alucard)",
+  "git.confirmSync": false,
+  "playwright.showTrace": true,
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredLightColorTheme": "Dracula Pro (Alucard)",
   "breadcrumbs.enabled": true,
   "editor.acceptSuggestionOnCommitCharacter": false,
   "editor.acceptSuggestionOnEnter": "off",
@@ -14,7 +14,7 @@
   "editor.cursorStyle": "block-outline",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.detectIndentation": true,
-  "editor.folding": false,
+  "editor.folding": true,
   "editor.fontFamily": "'Operator Mono','Dank Mono', 'Comic Code Ligatures'",
   "editor.fontLigatures": true,
   "editor.fontSize": 14,
@@ -77,7 +77,7 @@
   "workbench.tree.renderIndentGuides": "onHover",
 
   // Plugins
-	"emmet.showExpandedAbbreviation": "never",
+  "emmet.showExpandedAbbreviation": "never",
   "emmet.showAbbreviationSuggestions": false,
   "javascript.inlayHints.parameterNames.enabled": "literals",
   "javascript.updateImportsOnFileMove.enabled": "never",
@@ -88,5 +88,10 @@
   "vim.easymotion": true,
   "vim.leader": ",",
   "vim.matchpairs": "(:),{:},[:],<:>",
-  
+  "vim.smartRelativeLine": true,
+  "vim.showMarksInGutter": true,
+  "vim.useSystemClipboard": true,
+  "editor.fontWeight": "normal",
+  "vim.highlightedyank.enable": true,
+  "vim.hlsearch": true
 }

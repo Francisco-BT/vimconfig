@@ -1,5 +1,4 @@
 vim.g.dracula_colorterm = 0
-vim.cmd.colorscheme("dracula_pro")
 
 vim.opt.scrolloff = 8
 vim.opt.number = true

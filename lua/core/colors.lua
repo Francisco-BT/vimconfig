@@ -1,10 +1,10 @@
-vim.cmd.syntax("enable")
+local M = {}
 
-local ok = pcall(function()
-  vim.cmd.packadd("dracula_pro")
-  vim.g.dracula_colorterm = 0
-  vim.cmd.colorscheme("dracula_pro")
-end)
-if not ok then
-  vim.cmd.colorscheme("desert")
+function M.activate_dracula_pro()
+  vim.cmd([[
+let g:dracula_colorterm = 0
+colorscheme dracula_pro
+]])
 end
+
+return M

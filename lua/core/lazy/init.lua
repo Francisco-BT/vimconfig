@@ -1,3 +1,3 @@
 return {
-  -- Add plugins here, e.g. { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
+  -- Specs compartidos o “sueltos”; un plugin por archivo en esta carpeta (p. ej. rose-pine.lua).
 }

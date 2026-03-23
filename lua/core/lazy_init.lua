@@ -5,13 +5,15 @@ if not vim.loop.fs_stat(lazypath) then
     "clone",
     "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
+    "--branch=stable",
     lazypath,
   })
 end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    spec = "core.lazy",
-    change_detection = { notify = false }
+  spec = {
+    { import = "core.lazy" },
+  },
+  change_detection = { notify = false },
 })

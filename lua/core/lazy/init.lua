@@ -1,3 +1,7 @@
+-- List plugins with no extra configuration
 return {
-  -- Specs compartidos o “sueltos”; un plugin por archivo en esta carpeta (p. ej. rose-pine.lua).
+  {
+    "nvim-lua/plenary.nvim",
+    name = "plenary"
+  },
 }

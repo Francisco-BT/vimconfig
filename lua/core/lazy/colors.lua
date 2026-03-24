@@ -1,4 +1,4 @@
-function apply_theme_transparent(color)
+local function apply_theme_transparent(color)
 	color = color or "rose-pine"
 	vim.cmd.colorscheme(color)
 
@@ -7,7 +7,8 @@ function apply_theme_transparent(color)
 end
 
 math.randomseed(os.time())
-function pick_random_theme()
+
+local function pick_random_theme()
   local themes = { "dracula_pro", "dracula_pro_blade", "rose-pine" }
   local random_theme = themes[math.random(1, #themes)]
   apply_theme_transparent(random_theme)
@@ -24,8 +25,9 @@ vim.api.nvim_create_autocmd("User", {
 
 return {
   {
-    name = "dracula_pro",
     dir = vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro",
+    name = "dracula_pro",
+    priority = 1000,
     cond = function()
       return vim.fn.isdirectory(vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro") == 1
     end,
@@ -35,6 +37,7 @@ return {
   {
     "rose-pine/neovim",
     name = "rose-pine",
+    priority = 1000,
     config = function()
       require("rose-pine").setup({
         variant = "auto",

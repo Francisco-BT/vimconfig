@@ -45,10 +45,10 @@ autocmd("LspAttach", {
     vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts("Rename Symbol"))
 
     -- Diagnostics Navigation
-    vim.keymap.set("n", "[d", function()
+    vim.keymap.set("n", "]d", function()
       vim.diagnostic.jump({ count = 1, float = true })
     end, opts("Next Diagnostic"))
-    vim.keymap.set("n", "]d", function()
+    vim.keymap.set("n", "[d", function()
       vim.diagnostic.jump({ count = -1, float = true })
     end, opts("Previous Diagnostic"))
   end,

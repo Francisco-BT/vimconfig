@@ -1,117 +1,86 @@
 return {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-        "stevearc/conform.nvim",
-        "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim",
-        "hrsh7th/cmp-nvim-lsp",
-        "hrsh7th/cmp-buffer",
-        "hrsh7th/cmp-path",
-        "hrsh7th/cmp-cmdline",
-        "hrsh7th/nvim-cmp",
-        "L3MON4D3/LuaSnip",
-        "saadparwaiz1/cmp_luasnip",
-        "j-hui/fidget.nvim",
-        { "folke/lazydev.nvim", ft = "lua", opts = {} },
+  "neovim/nvim-lspconfig",
+  dependencies = {
+    "stevearc/conform.nvim",
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+    "j-hui/fidget.nvim",
+    { "folke/lazydev.nvim", ft = "lua", opts = {} },
+    {
+      "saghen/blink.cmp",
+      version = "*", -- stable
+      opts = {
+        keymap = { preset = "default" },
+        appearance = {
+          use_nvim_cmp_as_default = true,
+          nerd_font_variant = "mono",
+        },
+        sources = {
+          default = { "lsp", "path", "snippets", "buffer" },
+        },
+      },
     },
+  },
 
-    config = function()
-        require("conform").setup({
-            formatters_by_ft = {
-            }
-        })
-        local cmp = require('cmp')
-        local cmp_lsp = require("cmp_nvim_lsp")
-        local capabilities = vim.tbl_deep_extend(
-            "force",
-            {},
-            vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities())
+  config = function()
+    require("fidget").setup({})
+    require("mason").setup()
 
-        require("fidget").setup({})
-        require("mason").setup()
-        local mason_lspconfig = require("mason-lspconfig")
-        local servers = {
-            "lua_ls",
-            "vtsls",
-            "eslint",
-            "tailwindcss",
-        }
-        mason_lspconfig.setup({
-            ensure_installed = servers,
-            automatic_enable = true,
-        })
+    local blink = require("blink.cmp")
+    local mason_lspconfig = require("mason-lspconfig")
+    local servers = {
+      "lua_ls",
+      "vtsls",
+      "eslint",
+      "tailwindcss",
+    }
+    mason_lspconfig.setup({
+      ensure_installed = servers,
+      automatic_enable = true,
+    })
 
-        local server_configs = {
-            lua_ls = {
-                capabilities = capabilities,
-                settings = {
-                    Lua = {
-                        runtime = {
-                            version = "LuaJIT",
-                        },
-                        workspace = {
-                            checkThirdParty = false,
-                        },
-                        format = {
-                            enable = true,
-                            defaultConfig = {
-                                indent_style = "space",
-                                indent_size = "2",
-                            }
-                        },
-                    }
-                }
-            },
-            tailwindcss = {
-                capabilities = capabilities,
-                filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "heex" },
-            },
-            vtsls = {
-                capabilities = capabilities,
-            },
-            eslint = {
-                capabilities = capabilities,
-            },
-        }
+    local server_configs = {
+      lua_ls = {
+        settings = {
+          Lua = {
+            runtime = { version = "LuaJIT" },
+            workspace = { checkThirdParty = false },
+            format = { enable = false },
+          },
+        },
+      },
+      tailwindcss = {
+        filetypes = {
+          "html",
+          "css",
+          "scss",
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "vue",
+          "svelte",
+          "heex",
+        },
+      },
+    }
 
-        for server_name, config in pairs(server_configs) do
-            vim.lsp.config(server_name, config)
-        end
-
-        local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-        cmp.setup({
-            snippet = {
-                expand = function(args)
-                    require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-                end,
-            },
-            mapping = cmp.mapping.preset.insert({
-                ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
-            }),
-            sources = cmp.config.sources({
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- For luasnip users.
-            }, {
-                { name = 'buffer' },
-                { name = 'path' },
-            })
-        })
-
-        vim.diagnostic.config({
-            -- update_in_insert = true,
-            float = {
-                focusable = false,
-                style = "minimal",
-                border = "rounded",
-                source = "always",
-                header = "",
-                prefix = "",
-            },
-        })
+    local lspconfig = require("lspconfig")
+    for server_name, config in pairs(server_configs) do
+      config.capabilities = blink.get_lsp_capabilities(config.capabilities)
+      vim.lsp.config(server_name, config)
     end
+
+    vim.diagnostic.config({
+      -- update_in_insert = true,
+      float = {
+        focusable = false,
+        style = "minimal",
+        border = "rounded",
+        source = "always",
+        header = "",
+        prefix = "",
+      },
+    })
+  end,
 }

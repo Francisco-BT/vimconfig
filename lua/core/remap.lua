@@ -1,7 +1,7 @@
 local keymap = vim.keymap.set
 
--- Netrw vertical split
-keymap("n", "<leader>pv", ":Ex<CR>", { desc = "Vertical file explorer (netrw)" })
+-- Explorador de archivos (oil.nvim)
+keymap("n", "<leader>pv", "<cmd>Oil<CR>", { desc = "File explorer (oil)" })
 
 -- Quickfix navigation
 keymap("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item (centered)" })

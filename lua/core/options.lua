@@ -28,10 +28,9 @@ vim.opt.smartindent = true
 vim.opt.termguicolors = true
 
 vim.opt.list = true
-vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+vim.opt.listchars = { tab = "→ ", trail = "•", nbsp = "·" }
 vim.opt.cursorline = true
 
--- Netrw
-vim.g.netrw_browse_split = 0
-vim.g.netrw_banner = 0
-vim.g.netrw_winsize = 25
+-- Disable netrw, oil.nvim covers it
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1

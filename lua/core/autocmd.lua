@@ -53,3 +53,58 @@ autocmd("LspAttach", {
     end, opts("Previous Diagnostic"))
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "python", "go", "c" },
+  group = MineGroup,
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typescript", "javascript", "prisma", "lua", "css" },
+  group = MineGroup,
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
+local function set_blink_menu_highlights()
+  local accent = "#d4a373"
+  local menu_bg = "#1f1f1f"
+  local sel_bg = "#333333"
+  local sel_fg = "#5eacd3"
+
+  vim.api.nvim_set_hl(0, "Pmenu", { bg = menu_bg, fg = "NONE", force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu", force = true })
+
+  vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", {
+    bg = sel_bg,
+    fg = sel_fg,
+    bold = true,
+    nocombine = true,
+    force = true,
+  })
+  vim.api.nvim_set_hl(0, "PmenuSel", { bg = sel_bg, fg = sel_fg, bold = true, force = true })
+
+  vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = accent, bold = true, force = true })
+
+  vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { fg = accent, force = true })
+
+  -- Azul oscuro suave para la columna 80 (match con accent, no intrusivo)
+  vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#152b36", force = true })
+end
+
+vim.schedule(set_blink_menu_highlights)
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  group = MineGroup,
+  callback = function()
+    vim.schedule(set_blink_menu_highlights)
+  end,
+})

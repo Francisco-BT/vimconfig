@@ -12,7 +12,7 @@ return {
       opts = {
         keymap = { preset = "default" },
         appearance = {
-          use_nvim_cmp_as_default = true,
+          use_nvim_cmp_as_default = false,
           nerd_font_variant = "mono",
         },
         sources = {
@@ -33,6 +33,7 @@ return {
       "vtsls",
       "eslint",
       "tailwindcss",
+      "prismals",
     }
     mason_lspconfig.setup({
       ensure_installed = servers,
@@ -65,7 +66,6 @@ return {
       },
     }
 
-    local lspconfig = require("lspconfig")
     for server_name, config in pairs(server_configs) do
       config.capabilities = blink.get_lsp_capabilities(config.capabilities)
       vim.lsp.config(server_name, config)

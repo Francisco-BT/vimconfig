@@ -9,7 +9,7 @@ return {
       javascriptreact = { "prettierd" },
       typescriptreact = { "prettierd" },
       lua = { "stylua" },
-      prisma = { "prettier", "prettierd", "prismals" },
+      prisma = { "prismaFmt" },
     },
     formatters = {
       stylua = {

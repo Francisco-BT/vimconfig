@@ -24,9 +24,13 @@ keymap({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete to void register" })
 keymap("x", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 keymap("x", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
-
 -- Replace
-keymap("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor globally" })
+keymap(
+  "n",
+  "<leader>s",
+  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+  { desc = "Replace word under cursor globally" }
+)
 
 -- Helpers
 keymap("n", "J", "mzJ`z", { desc = "Join lines without moving cursor" })
@@ -37,5 +41,11 @@ keymap("n", "=ap", "ma=ap'a", { desc = "Format paragraph keeping cursor position
 
 -- Just kidding
 keymap("n", "<leader>ca", function()
-    require("cellular-automaton").start_animation("make_it_rain")
+  require("cellular-automaton").start_animation("make_it_rain")
 end, { desc = "Cellular Automaton: Make it rain!" })
+
+keymap("n", "<leader>cr", function()
+  local relative_path = vim.fn.expand("%:.")
+  vim.fn.setreg("+", relative_path)
+  print("Path copied >> " .. relative_path)
+end, { desc = "Copy current file relative path" })

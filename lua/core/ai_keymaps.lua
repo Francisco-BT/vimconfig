@@ -34,14 +34,13 @@ end
 -- in memory to copy later with <leader>cb. This reduces chat-editor noise.
 local SPLIT_CODE_BLOCK = true
 local last_code_fence = nil ---@type string|nil
-local last_reference = nil ---@type string|nil
 
 local function ai_build_code_fence(ft, code)
   return "```" .. ft .. "\n" .. code .. "\n```"
 end
 
 -- Forward declare because some helpers call it before definition.
-local ai_set_clipboard ---@type fun(text: string, code_fence: string, reference: string)|nil
+local ai_set_clipboard ---@type fun(text: string, code_fence: string)|nil
 
 local function ai_get_cursor_line()
   return vim.api.nvim_win_get_cursor(0)[1]
@@ -54,7 +53,7 @@ local function ai_copy_range(path, ft, start_line, end_line)
   local code_fence = ai_build_code_fence(ft, code)
 
   if SPLIT_CODE_BLOCK then
-    ai_set_clipboard(header, code_fence, header)
+    ai_set_clipboard(header, code_fence)
     print("AI copy (scope ref): " .. header .. " (code cached)")
   else
     vim.fn.setreg("+", ai_build_clipboard(header, ft, code))
@@ -120,10 +119,9 @@ local function ai_treesitter_node_range()
   return nil
 end
 
-ai_set_clipboard = function(text, code_fence, reference)
+ai_set_clipboard = function(text, code_fence)
   vim.fn.setreg("+", text)
   last_code_fence = code_fence
-  last_reference = reference
 end
 
 local function ai_copy_last_code_block_replace()
@@ -135,27 +133,9 @@ local function ai_copy_last_code_block_replace()
   print("AI: copied last code block")
 end
 
-local function ai_build_clipboard_collapsible(header, ft, code, summary)
-  local s = summary or header
-  return table.concat({
-    "<details>",
-    ("<summary>%s</summary>"):format(s),
-    "",
-    header,
-    "",
-    ("```%s"):format(ft),
-    code,
-    "```",
-    "</details>",
-  }, "\n")
-end
-
 local MAX_FILE_LINES = 300
 local FILE_HEAD_LINES = 150
 local FILE_TAIL_LINES = 150
--- Many chat UIs do NOT render <details>/<summary> as collapsible.
--- Keep this off by default; enable if your target chat supports it.
-local COLLAPSE_LARGE_FILE_BLOCKS = false
 
 local function ai_clip_file_lines(all_lines)
   local n = #all_lines
@@ -382,7 +362,7 @@ function M.setup()
       local code_fence = ai_build_code_fence(ft, code)
 
       if SPLIT_CODE_BLOCK then
-        ai_set_clipboard(header, code_fence, header)
+        ai_set_clipboard(header, code_fence)
         print("AI copy (selection ref): " .. header .. " (code cached)")
       else
         vim.fn.setreg("+", ai_build_clipboard(header, ft, code))
@@ -401,21 +381,12 @@ function M.setup()
     local n = meta.n
 
     local header = "@" .. path .. "#L1-L" .. math.max(n, 1)
-    local payload = ai_build_clipboard(header, ft, code)
-    if COLLAPSE_LARGE_FILE_BLOCKS and meta.truncated then
-      payload = ai_build_clipboard_collapsible(
-        header,
-        ft,
-        code,
-        ("Code (%s) — truncated %d/%d lines"):format(path, meta.omitted, meta.n)
-      )
-    end
 
     if SPLIT_CODE_BLOCK then
-      ai_set_clipboard(header, ai_build_code_fence(ft, code), header)
+      ai_set_clipboard(header, ai_build_code_fence(ft, code))
       print("AI copy (file ref): " .. header .. " (code cached)")
     else
-      vim.fn.setreg("+", payload)
+      vim.fn.setreg("+", ai_build_clipboard(header, ft, code))
       print("AI copy (file): " .. header)
     end
   end, { desc = "AI: [C]ode [A]ll (full file, @path#L1-LN)" })
@@ -451,7 +422,7 @@ function M.setup()
         local code_fence = ai_build_code_fence(ft, code)
         if SPLIT_CODE_BLOCK then
           -- header is prefilled at top of the prompt buffer
-          ai_set_clipboard(input, code_fence, header)
+          ai_set_clipboard(input, code_fence)
           print("AI copy (question + selection ref): " .. header .. " (code cached)")
         else
           vim.fn.setreg("+", input .. "\n\n" .. ai_build_clipboard(header, ft, code))
@@ -472,22 +443,12 @@ function M.setup()
     local header = "@" .. path .. "#L1-L" .. math.max(n, 1)
 
     ai_open_prompt_float({ title = "AI question (file)", placeholder = header .. " " }, function(input)
-      local block = ai_build_clipboard(header, ft, code)
-      if COLLAPSE_LARGE_FILE_BLOCKS and meta.truncated then
-        block = ai_build_clipboard_collapsible(
-          header,
-          ft,
-          code,
-          ("Code (%s) — truncated %d/%d lines"):format(path, meta.omitted, meta.n)
-        )
-      end
-
       if SPLIT_CODE_BLOCK then
         -- header is prefilled at top of the prompt buffer
-        ai_set_clipboard(input, ai_build_code_fence(ft, code), header)
+        ai_set_clipboard(input, ai_build_code_fence(ft, code))
         print("AI copy (question + file ref): " .. header .. " (code cached)")
       else
-        vim.fn.setreg("+", input .. "\n\n" .. block)
+        vim.fn.setreg("+", input .. "\n\n" .. ai_build_clipboard(header, ft, code))
         print("AI copy (question + file): " .. header)
       end
     end)

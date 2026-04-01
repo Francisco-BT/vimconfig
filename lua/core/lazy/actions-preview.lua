@@ -4,7 +4,7 @@ return {
     event = "LspAttach",
     config = function()
       -- Keybinding: Maps <leader>ca to the preview UI in both Normal and Visual modes
-      vim.keymap.set({ "v", "n" }, "<leader>ca", require("actions-preview").code_actions, {
+      vim.keymap.set({ "v", "n" }, "<leader>vca", require("actions-preview").code_actions, {
         desc = "LSP Code Actions with Preview",
       })
 

@@ -40,12 +40,20 @@ keymap("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make c
 keymap("n", "=ap", "ma=ap'a", { desc = "Format paragraph keeping cursor position" })
 
 -- Just kidding
-keymap("n", "<leader>ca", function()
+keymap("n", "<leader>mir", function()
   require("cellular-automaton").start_animation("make_it_rain")
 end, { desc = "Cellular Automaton: Make it rain!" })
 
-keymap("n", "<leader>cr", function()
-  local relative_path = vim.fn.expand("%:.")
-  vim.fn.setreg("+", relative_path)
-  print("Path copied >> " .. relative_path)
-end, { desc = "Copy current file relative path" })
+require("core.ai_keymaps").setup()
+
+-- 1. [C]ode [F]ormat (Normal Mode: <leader>cf)
+-- Deep clean (spaces) + Conform formatting.
+keymap("n", "<leader>cf", function()
+  local save_cursor = vim.fn.getpos(".")
+  -- Clean trailing whitespaces
+  vim.cmd([[%s/\s\+$//e]])
+  -- Run Conform formatter
+  require("conform").format({ lsp_fallback = true })
+  vim.fn.setpos(".", save_cursor)
+  print("🧹 Code Formatted & Sanitized")
+end, { desc = "AI: [C]ode [F]ormat (Clean & Conform)" })

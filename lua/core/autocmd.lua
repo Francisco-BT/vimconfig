@@ -74,6 +74,42 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+local function hex_to_rgb(hex)
+  hex = hex:gsub("#", "")
+  return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16)
+end
+
+local function rgb_to_hex(r, g, b)
+  return string.format("#%02x%02x%02x", r, g, b)
+end
+
+---ColorColumn: update ColorColumn based on the selected ColorScheme
+local function set_colorcolumn_hl()
+  local ref = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  local bg = ref.bg
+  if type(bg) == "number" then
+    bg = string.format("#%06x", bg)
+  end
+  if not bg then
+    ref = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
+    if ref.bg then
+      bg = string.format("#%06x", ref.bg)
+    end
+  end
+  if not bg then
+    bg = "#1e1e2e"
+  end
+
+  local r, g, b = hex_to_rgb(bg)
+  local lum = (r + g + b) / 3
+  local delta = lum < 140 and 20 or -20
+  r = math.min(255, math.max(0, r + delta))
+  g = math.min(255, math.max(0, g + delta))
+  b = math.min(255, math.max(0, b + delta))
+
+  vim.api.nvim_set_hl(0, "ColorColumn", { bg = rgb_to_hex(r, g, b), force = true })
+end
+
 local function set_blink_menu_highlights()
   local accent = "#d4a373"
   local menu_bg = "#1f1f1f"
@@ -96,8 +132,7 @@ local function set_blink_menu_highlights()
 
   vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { fg = accent, force = true })
 
-  -- Azul oscuro suave para la columna 80 (match con accent, no intrusivo)
-  vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#152b36", force = true })
+  set_colorcolumn_hl()
 end
 
 vim.schedule(set_blink_menu_highlights)

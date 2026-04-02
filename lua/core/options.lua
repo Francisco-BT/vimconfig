@@ -17,7 +17,7 @@ vim.opt.signcolumn = "yes"
 
 vim.opt.guicursor = ""
 vim.opt.isfname:append("@-@")
-vim.opt.colorcolumn = "80"
+vim.opt.colorcolumn = { "80" }
 vim.opt.wrap = false
 vim.opt.scrolloff = 8
 vim.opt.number = true

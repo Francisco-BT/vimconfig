@@ -1,7 +1,6 @@
 local keymap = vim.keymap.set
 
--- Explorador de archivos (oil.nvim)
-keymap("n", "<leader>pv", "<cmd>Oil<CR>", { desc = "File explorer (oil)" })
+-- File explorer: <leader>pv is set in lua/core/lazy/oil.lua (Oil float)
 
 -- Quickfix navigation
 keymap("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item (centered)" })

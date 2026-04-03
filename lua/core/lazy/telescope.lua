@@ -9,8 +9,11 @@ return {
 
     local builtin = require("telescope.builtin")
 
-    -- Find any file in the project
     vim.keymap.set("n", "<leader>pf", builtin.find_files, { desc = "Telescope find files" })
+
+    vim.keymap.set("n", "<leader>pF", function()
+      builtin.find_files({ hidden = true, prompt_title = "Find Files (incl. hidden)" })
+    end, { desc = "Telescope find files (hidden/dotfiles)" })
 
     -- Search for files respecting .gitignore
     vim.keymap.set("n", "<C-p>", builtin.git_files, { desc = "Telescope git files" })

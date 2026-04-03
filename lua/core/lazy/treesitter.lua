@@ -31,7 +31,7 @@ return {
             local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
             if ok and stats and stats.size > max_filesize then
               vim.notify(
-                "File larger than 100KB treesitter disabled for performance",
+                "File larger than 300KB: treesitter disabled for performance",
                 vim.log.levels.WARN,
                 { title = "Treesitter" }
               )
@@ -42,10 +42,10 @@ return {
       })
     end,
   },
-  -- The Context Plugin (Sticky headers for functions/classes)
+  -- Sticky headers (loads after treesitter)
   {
     "nvim-treesitter/nvim-treesitter-context",
-    after = "nvim-treesitter",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
       require("treesitter-context").setup({
         multiwindow = false,

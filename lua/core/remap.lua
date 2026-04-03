@@ -45,14 +45,16 @@ end, { desc = "Cellular Automaton: Make it rain!" })
 
 require("core.ai_keymaps").setup()
 
--- 1. [C]ode [F]ormat (Normal Mode: <leader>cf)
--- Deep clean (spaces) + Conform formatting.
+-- [C]ode [F]ormat: trim EOL + conform (pcall if plugin not ready)
 keymap("n", "<leader>cf", function()
+  local ok, conform = pcall(require, "conform")
+  if not ok then
+    vim.notify("conform.nvim is not loaded yet", vim.log.levels.WARN)
+    return
+  end
   local save_cursor = vim.fn.getpos(".")
-  -- Clean trailing whitespaces
   vim.cmd([[%s/\s\+$//e]])
-  -- Run Conform formatter
-  require("conform").format({ lsp_fallback = true })
+  conform.format({ lsp_fallback = true })
   vim.fn.setpos(".", save_cursor)
-  print("🧹 Code Formatted & Sanitized")
-end, { desc = "AI: [C]ode [F]ormat (Clean & Conform)" })
+  vim.notify("Formatted", vim.log.levels.INFO, { title = "Conform" })
+end, { desc = "Format buffer (trim + conform)" })

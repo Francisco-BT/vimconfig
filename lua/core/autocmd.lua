@@ -40,8 +40,7 @@ autocmd("LspAttach", {
     vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts("Open Diagnostic Float"))
     vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts("Signature Help"))
 
-    -- Actions & Refactoring
-    vim.keymap.set("n", "<leader>vca", require("actions-preview").code_actions, opts("Code Action (Preview)"))
+    -- Actions & refactorings
     vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts("Rename Symbol"))
 
     -- Diagnostics Navigation

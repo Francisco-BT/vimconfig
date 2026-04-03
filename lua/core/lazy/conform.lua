@@ -31,7 +31,7 @@ return {
   init = function()
     vim.keymap.set("n", "<leader>f", function()
       require("conform").format({ bufnr = 0 })
-    end)
+    end, { desc = "Format buffer (conform)" })
     vim.api.nvim_create_user_command("FormatDisable", function(args)
       if args.bang then
         vim.b.disable_autoformat = true

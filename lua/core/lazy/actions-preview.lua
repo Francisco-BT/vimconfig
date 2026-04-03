@@ -3,7 +3,7 @@ return {
     "aznhe21/actions-preview.nvim",
     event = "LspAttach",
     config = function()
-      -- Keybinding: Maps <leader>ca to the preview UI in both Normal and Visual modes
+      -- <leader>vca in normal + visual (buffer-local LSP maps stay in autocmd.lua)
       vim.keymap.set({ "v", "n" }, "<leader>vca", require("actions-preview").code_actions, {
         desc = "LSP Code Actions with Preview",
       })

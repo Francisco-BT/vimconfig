@@ -2,47 +2,69 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
+    lazy = false,
+    build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        modules = {},
-        ignore_install = {},
-        ensure_installed = {
+      require("nvim-treesitter").setup()
+
+      require("nvim-treesitter").install({
+        "lua",
+        "vim",
+        "vimdoc",
+        "javascript",
+        "typescript",
+        "tsx",
+        "prisma",
+        "json",
+        "bash",
+        "markdown",
+      })
+
+      local max_filesize = 300 * 1024
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("MineTreesitterStart", { clear = true }),
+        pattern = {
           "lua",
           "vim",
-          "vimdoc",
           "javascript",
+          "javascriptreact",
           "typescript",
-          "tsx",
+          "typescriptreact",
           "prisma",
           "json",
+          "jsonc",
           "bash",
+          "sh",
           "markdown",
+          "help",
         },
-        sync_install = false,
-        auto_install = true,
-        indent = { enable = true },
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = { "markdown" },
+        callback = function(args)
+          local buf = args.buf
+          local path = vim.api.nvim_buf_get_name(buf)
+          local ok, stats = pcall(vim.loop.fs_stat, path)
+          if ok and stats and stats.size > max_filesize then
+            vim.notify(
+              "File larger than 300KB: treesitter not started for performance",
+              vim.log.levels.WARN,
+              { title = "Treesitter" }
+            )
+            return
+          end
 
-          -- ThePrimeagen's Anti-Lag Shield
-          disable = function(lang, buf)
-            local max_filesize = 300 * 1024 -- 300 KB
-            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-            if ok and stats and stats.size > max_filesize then
-              vim.notify(
-                "File larger than 300KB: treesitter disabled for performance",
-                vim.log.levels.WARN,
-                { title = "Treesitter" }
-              )
-              return true
+          vim.api.nvim_buf_call(buf, function()
+            vim.treesitter.start()
+            if vim.bo.filetype == "markdown" then
+              vim.opt_local.syntax = "on"
             end
-          end,
-        },
+            -- Plain .js: indent del ftplugin de Vim; TS/TSX/etc.: indent experimental de nvim-treesitter (main).
+            if vim.bo.filetype ~= "javascript" then
+              vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end
+          end)
+        end,
       })
     end,
   },
-  -- Sticky headers (loads after treesitter)
   {
     "nvim-treesitter/nvim-treesitter-context",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
@@ -50,7 +72,7 @@ return {
       require("treesitter-context").setup({
         multiwindow = false,
         enable = true,
-        max_lines = 4, -- Limits the sticky header to 4 lines max
+        max_lines = 4,
         line_numbers = true,
         trim_scope = "outer",
         mode = "cursor",

@@ -1,7 +1,7 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "master",
+    branch = "main",
     config = function()
       require("nvim-treesitter.configs").setup({
         modules = {},

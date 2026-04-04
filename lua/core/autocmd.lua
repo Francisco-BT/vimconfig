@@ -64,7 +64,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "typescript", "javascript", "prisma", "lua", "css" },
+  pattern = { "typescript", "javascript", "typescriptreact", "javascriptreact", "prisma", "lua", "css" },
   group = MineGroup,
   callback = function()
     vim.opt_local.shiftwidth = 2

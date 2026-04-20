@@ -14,7 +14,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     { import = "core.lazy" },
-    { import = "core.lazy.mini_animate" },
   },
   change_detection = { notify = false },
 })

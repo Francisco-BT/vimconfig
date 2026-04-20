@@ -2,6 +2,8 @@ local keymap = vim.keymap.set
 
 -- File explorer: <leader>pv is set in lua/core/lazy/oil.lua (Oil float)
 
+require("core.buffer_close").setup()
+
 -- Quickfix navigation
 keymap("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next location list item (centered)" })
 keymap("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Previous location list item (centered)" })

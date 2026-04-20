@@ -5,4 +5,5 @@ return {
     name = "plenary",
   },
   "eandrju/cellular-automaton.nvim",
+  { import = "core.lazy.mini_animate" },
 }

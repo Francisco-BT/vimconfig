@@ -33,7 +33,13 @@ vim.opt.termguicolors = true
 
 vim.opt.list = true
 vim.opt.listchars = { tab = "→ ", trail = "•", nbsp = "·" }
+vim.opt.fillchars = { eob = " ", diff = "╱", }
 vim.opt.cursorline = true
+
+-- Rounded borders on floats / diagnostics (Neovim 0.11+)
+if vim.fn.has("nvim-0.11") == 1 then
+  vim.opt.winborder = "rounded"
+end
 
 -- Disable netrw, oil.nvim covers it
 vim.g.loaded_netrw = 1

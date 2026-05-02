@@ -1,4 +1,6 @@
 require("core.options")
+require("core.mode_cursorline").setup()
+require("core.buffer_close").setup()
 require("core.remap")
 require("core.autocmd")
 require("core.lazy_init")

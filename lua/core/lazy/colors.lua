@@ -1,48 +1,90 @@
-local function apply_theme_transparent(color)
-  color = color or "rose-pine"
-  vim.cmd.colorscheme(color)
+local DEFAULT_THEME = "base16-dracula"
 
-  vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-  vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+local function set_theme(colorscheme, opts)
+  opts = opts or {}
+  colorscheme = colorscheme or DEFAULT_THEME
+
+  vim.cmd.colorscheme(colorscheme)
+
+  if opts.transparent == true then
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+  end
 end
 
-math.randomseed(os.time())
+local THEME_CHOICES = {
+  "base16-dracula",
+  "kanagawa",
+  "night-owl",
+  "oxocarbon",
+  "dracula_pro",
+  "gruvbox",
+}
 
-local function pick_random_theme()
-  local themes = {
-    "base16-dracula",
-    "dracula_pro",
-    "base16-circus",
-    "dracula_pro_blade",
-    "base16-dracula",
-    "rose-pine",
-    "gruvbox",
-    "base16-oceanicnext",
-    "base16-solarflare",
-  }
-  local random_theme = themes[math.random(1, #themes)]
-  apply_theme_transparent(random_theme)
-end
+vim.api.nvim_create_user_command("Theme", function(cmd)
+  local name = cmd.args ~= "" and cmd.args or DEFAULT_THEME
+  set_theme(name, { transparent = true })
+end, {
+  nargs = "?",
+  complete = function()
+    return THEME_CHOICES
+  end,
+})
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "LazyDone",
   once = true,
   callback = function()
-    pick_random_theme()
+    set_theme(DEFAULT_THEME, { transparent = true })
   end,
 })
 
 return {
   {
-    "chriskempson/base16-vim",
-    name = "base16",
+    "Francisco-BT/base16-dracula",
+    name = "base16-dracula",
+    priority = 1000,
+  },
+  {
+    "rebelot/kanagawa.nvim",
+    name = "kanagawa",
+    priority = 1000,
+    config = function()
+      require("kanagawa").setup({
+        transparent = true,
+        commentStyle = { italic = true },
+        keywordStyle = { italic = true },
+        statementStyle = { bold = false },
+        typeStyle = { bold = false },
+      })
+    end,
+  },
+  {
+    dir = vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro",
+    name = "dracula_pro",
+    priority = 1000,
+    cond = function()
+      return vim.fn.isdirectory(vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro") == 1
+    end,
+    config = function() end,
+  },
+  {
+    "haishanh/night-owl.vim",
+    name = "night-owl",
+    priority = 1000,
+  },
+  {
+    "nyoom-engineering/oxocarbon.nvim",
+    name = "oxocarbon",
+    priority = 1000,
   },
   {
     "ellisonleao/gruvbox.nvim",
     name = "gruvbox",
+    priority = 1000,
     config = function()
       require("gruvbox").setup({
-        terminal_colors = true, -- add neovim terminal colors
+        terminal_colors = true,
         undercurl = true,
         underline = false,
         bold = true,
@@ -58,36 +100,12 @@ return {
         invert_signs = false,
         invert_tabline = false,
         invert_intend_guides = false,
-        inverse = true, -- invert background for search, diffs, statuslines and errors
-        contrast = "", -- can be "hard", "soft" or empty string
+        inverse = true,
+        contrast = "",
         palette_overrides = {},
         overrides = {},
         dim_inactive = false,
-        transparent_mode = false,
-      })
-    end,
-  },
-  {
-    dir = vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro",
-    name = "dracula_pro",
-    priority = 1000,
-    cond = function()
-      return vim.fn.isdirectory(vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro") == 1
-    end,
-    config = function() end,
-  },
-  {
-    "rose-pine/neovim",
-    name = "rose-pine",
-    priority = 1000,
-    config = function()
-      require("rose-pine").setup({
-        variant = "auto",
-        dark_variant = "moon",
-        disable_background = true,
-        styles = {
-          italic = false,
-        },
+        transparent_mode = true,
       })
     end,
   },

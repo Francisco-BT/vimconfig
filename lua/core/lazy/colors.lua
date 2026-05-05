@@ -5,11 +5,39 @@ local function set_theme(colorscheme, opts)
   colorscheme = colorscheme or DEFAULT_THEME
 
   vim.cmd.colorscheme(colorscheme)
+end
 
-  if opts.transparent == true then
-    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+--- Prefer local checkout (edits without push), then env override, then GitHub.
+local function base16_dracula_lazy_spec()
+  local candidates = {
+    vim.fn.expand("~/mine/dev-env/themes/base16-dracula"),
+    vim.env.NVIM_BASE16_DRACULA_DIR and vim.fn.expand(vim.env.NVIM_BASE16_DRACULA_DIR) or "",
+  }
+
+  for _, dir in ipairs(candidates) do
+    if dir ~= "" and vim.fn.isdirectory(dir) == 1 then
+      return {
+        dir = dir,
+        name = "base16-dracula",
+        priority = 1000,
+        dev = true,
+      }
+    end
   end
+
+  return {
+    "Francisco-BT/base16-dracula",
+    name = "base16-dracula",
+    priority = 1000,
+  }
+end
+
+local function dracula_pro_dir()
+  return vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro"
+end
+
+local function dracula_pro_available()
+  return vim.fn.isdirectory(dracula_pro_dir()) == 1
 end
 
 local THEME_CHOICES = {
@@ -19,15 +47,39 @@ local THEME_CHOICES = {
   "oxocarbon",
   "dracula_pro",
   "gruvbox",
+  "rose-pine",
 }
 
+local function available_themes()
+  local out = {}
+  for _, name in ipairs(THEME_CHOICES) do
+    if name == "dracula_pro" then
+      if dracula_pro_available() then
+        table.insert(out, name)
+      end
+    else
+      table.insert(out, name)
+    end
+  end
+  return out
+end
+
+local function pick_random_theme()
+  local themes = available_themes()
+  if #themes == 0 then
+    return DEFAULT_THEME
+  end
+  return themes[math.random(#themes)]
+end
+
+-- TODO: Add a command to toggle the transparent background
 vim.api.nvim_create_user_command("Theme", function(cmd)
   local name = cmd.args ~= "" and cmd.args or DEFAULT_THEME
-  set_theme(name, { transparent = true })
+  set_theme(name, {})
 end, {
   nargs = "?",
   complete = function()
-    return THEME_CHOICES
+    return available_themes()
   end,
 })
 
@@ -35,23 +87,20 @@ vim.api.nvim_create_autocmd("User", {
   pattern = "LazyDone",
   once = true,
   callback = function()
-    set_theme(DEFAULT_THEME, { transparent = true })
+    math.randomseed(os.time())
+    set_theme(pick_random_theme(), {})
   end,
 })
 
 return {
-  {
-    "Francisco-BT/base16-dracula",
-    name = "base16-dracula",
-    priority = 1000,
-  },
+  base16_dracula_lazy_spec(),
   {
     "rebelot/kanagawa.nvim",
     name = "kanagawa",
     priority = 1000,
     config = function()
       require("kanagawa").setup({
-        transparent = true,
+        transparent = false,
         commentStyle = { italic = true },
         keywordStyle = { italic = true },
         statementStyle = { bold = false },
@@ -60,13 +109,15 @@ return {
     end,
   },
   {
-    dir = vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro",
+    dir = dracula_pro_dir(),
     name = "dracula_pro",
     priority = 1000,
     cond = function()
-      return vim.fn.isdirectory(vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro") == 1
+      return dracula_pro_available()
     end,
-    config = function() end,
+    config = function()
+      vim.g.dracula_colorterm = 1
+    end,
   },
   {
     "haishanh/night-owl.vim",
@@ -77,6 +128,21 @@ return {
     "nyoom-engineering/oxocarbon.nvim",
     name = "oxocarbon",
     priority = 1000,
+  },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    priority = 1000,
+    config = function()
+      require("rose-pine").setup({
+        variant = "auto",
+        dark_variant = "moon",
+        disable_background = false,
+        styles = {
+          italic = false,
+        },
+      })
+    end,
   },
   {
     "ellisonleao/gruvbox.nvim",
@@ -105,7 +171,7 @@ return {
         palette_overrides = {},
         overrides = {},
         dim_inactive = false,
-        transparent_mode = true,
+        transparent_mode = false,
       })
     end,
   },

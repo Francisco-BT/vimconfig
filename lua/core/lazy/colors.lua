@@ -7,31 +7,6 @@ local function set_theme(colorscheme, opts)
   vim.cmd.colorscheme(colorscheme)
 end
 
---- Prefer local checkout (edits without push), then env override, then GitHub.
-local function base16_dracula_lazy_spec()
-  local candidates = {
-    vim.fn.expand("~/mine/dev-env/themes/base16-dracula"),
-    vim.env.NVIM_BASE16_DRACULA_DIR and vim.fn.expand(vim.env.NVIM_BASE16_DRACULA_DIR) or "",
-  }
-
-  for _, dir in ipairs(candidates) do
-    if dir ~= "" and vim.fn.isdirectory(dir) == 1 then
-      return {
-        dir = dir,
-        name = "base16-dracula",
-        priority = 1000,
-        dev = true,
-      }
-    end
-  end
-
-  return {
-    "Francisco-BT/base16-dracula",
-    name = "base16-dracula",
-    priority = 1000,
-  }
-end
-
 local function dracula_pro_dir()
   return vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro"
 end
@@ -93,7 +68,11 @@ vim.api.nvim_create_autocmd("User", {
 })
 
 return {
-  base16_dracula_lazy_spec(),
+  {
+    "Francisco-BT/base16-dracula",
+    name = "base16-dracula",
+    priority = 1000,
+  },
   {
     "rebelot/kanagawa.nvim",
     name = "kanagawa",

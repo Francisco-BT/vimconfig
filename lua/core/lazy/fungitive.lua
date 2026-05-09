@@ -31,7 +31,10 @@ return {
       end,
     })
 
-    vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
-    vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
+    -- Merge conflict / vimdiff: //2 and //3 (common fugitive mnemonic: gl / gh).
+    vim.keymap.set("n", "gl", "<cmd>diffget //2<cr>", { desc = "Diffget from //2" })
+    vim.keymap.set("n", "gh", "<cmd>diffget //3<cr>", { desc = "Diffget from //3" })
+    vim.keymap.set("x", "gl", ":diffget //2<cr>", { silent = true, desc = "Diffget //2 (visual)" })
+    vim.keymap.set("x", "gh", ":diffget //3<cr>", { silent = true, desc = "Diffget //3 (visual)" })
   end,
 }

@@ -41,6 +41,23 @@ return {
     })
 
     local server_configs = {
+      vtsls = {
+        settings = {
+          experimental = {
+            maxInlayHintLength = 30,
+          },
+          typescript = {
+            tsserver = {
+              maxTsServerMemory = 8192,
+            },
+          },
+          javascript = {
+            tsserver = {
+              maxTsServerMemory = 8192,
+            },
+          },
+        },
+      },
       lua_ls = {
         settings = {
           Lua = {

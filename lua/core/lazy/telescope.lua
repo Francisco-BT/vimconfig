@@ -9,7 +9,7 @@ return {
     local themes = require("telescope.themes")
 
     require("telescope").setup({
-      -- vim.lsp.buf.code_action(), vim.ui.input, etc. usan vim.ui.select → Telescope
+      -- vim.lsp.buf.code_action(), vim.ui.input, etc. use vim.ui.select → Telescope
       extensions = {
         ["ui-select"] = themes.get_cursor({
           layout_config = {
@@ -46,7 +46,7 @@ return {
       builtin.live_grep({ default_text = vim.fn.expand("<cword>") })
     end, { desc = "Telescope live grep (word under cursor)" })
 
-    -- Misma API que :lua vim.lsp.buf.code_action(); ui-select muestra la lista en flotante (tema cursor)
+    -- Same API as :lua vim.lsp.buf.code_action(); ui-select shows the list in a float (cursor theme)
     vim.keymap.set({ "n", "v" }, "<leader>vca", vim.lsp.buf.code_action, {
       desc = "LSP code actions",
     })

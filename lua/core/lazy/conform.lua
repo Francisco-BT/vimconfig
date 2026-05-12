@@ -16,7 +16,7 @@ return {
         prepend_args = { "--indent-type", "Spaces", "--indent-width", "2" },
       },
     },
-    -- Tabla sola no respeta vim.g/b.disable_autoformat; hay que usar función (ver :h conform.nvim recipes)
+    -- A plain table ignores vim.g/b.disable_autoformat; use a function (see :h conform.nvim recipes)
     format_on_save = function(bufnr)
       if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
         return
@@ -38,10 +38,10 @@ return {
       else
         vim.g.disable_autoformat = true
       end
-    end, { bang = true, desc = "Desactiva format on save (buffer con !)" })
+    end, { bang = true, desc = "Disable format on save (! = this buffer only)" })
     vim.api.nvim_create_user_command("FormatEnable", function()
       vim.b.disable_autoformat = false
       vim.g.disable_autoformat = false
-    end, { desc = "Reactiva format on save" })
+    end, { desc = "Enable format on save" })
   end,
 }

@@ -1,9 +1,9 @@
---- CursorLine por modo: misma tabla de roles que Rose Pine, pero colores = mezcla
---- Normal.bg + acento leído del colorscheme activo (no paleta fija).
+--- Per-mode CursorLine: same role table as Rose Pine, but colors mix
+--- Normal.bg + an accent sampled from the active colorscheme (not a fixed palette).
 ---
 --- vim.g.mode_cursorline_palette = "theme" | "rose_pine" (default: theme)
 ---
---- Fuerzas opcionales (0–1; por defecto calibradas como la mezcla Rose Pine):
+--- Optional strengths (0–1; defaults mirror Rose Pine-style mix weights):
 ---   g:mode_cursorline_theme_strength_insert / _visual / _delete / _yank / _change / _other
 --- Legacy: g:mode_cursorline_mix → insert; _mix_visual → visual; _mix_delete → delete
 
@@ -34,7 +34,7 @@ local function rgb_mix(c1, c2, t)
   return r * 65536 + g * 256 + b
 end
 
--- Rose Pine Moon — solo cuando palette == "rose_pine"
+-- Rose Pine Moon — only when palette == "rose_pine"
 local BASE_MOON = 0x232136
 local GOLD_LINE = rgb_mix(BASE_MOON, 0xf6c177, 0.32)
 local PINE_LINE = rgb_mix(BASE_MOON, 0x3e8fb0, 0.22)
@@ -47,7 +47,7 @@ local ROSE_PINE = {
   operator_other = rgb_mix(BASE_MOON, 0x6e6a86, 0.14),
 }
 
---- Por rol: grupos highlight a probar, preferencia fg/bg, fallback hex, fuerza por defecto (como Rose Pine).
+--- Per role: highlight groups to try, fg/bg preference, hex fallback, default strength (Rose Pine-like).
 ---@type table<string, { groups: string[], prefer: "fg"|"bg", fallback: integer, default: number, gvar: string, legacy?: string }>
 local THEME_BY_ROLE = {
   insert = {
@@ -228,7 +228,7 @@ end
 ---@param prefer "fg"|"bg"
 ---@return integer|nil
 local function hl_rgb(name, prefer)
-  -- link=false → colores efectivos tras resolver links (link=true suele omitir fg/bg).
+  -- link=false → effective colors after resolving links (link=true often omits fg/bg).
   local h = vim.api.nvim_get_hl(0, { name = name, link = false })
   if prefer == "fg" then
     if h.fg then

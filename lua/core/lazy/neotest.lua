@@ -1,5 +1,5 @@
--- Carga diferida: no se instala el plugin hasta el primer uso de un <leader>t* (lazy.keys).
--- Requiere treesitter (ya lo tienes en lazy); no duplicamos dependencia para no forzar orden raro.
+-- Lazy-load: plugin is not loaded until a <leader>t* mapping is used (lazy.nvim `keys`).
+-- Treesitter is loaded elsewhere; we do not depend on it here to avoid load-order coupling.
 
 local function run_nearest()
   require("neotest").run.run()
@@ -24,7 +24,7 @@ end
 local function run_nearest_dap()
   local ok = pcall(require, "dap")
   if not ok then
-    vim.notify("nvim-dap no está cargado: ejecutando test sin DAP", vim.log.levels.WARN)
+    vim.notify("nvim-dap not loaded; running test without DAP", vim.log.levels.WARN)
     run_nearest()
     return
   end
@@ -47,7 +47,7 @@ return {
     { "<leader>ts", run_cwd, desc = "Neotest: all tests (cwd)" },
     { "<leader>tv", toggle_summary, desc = "Neotest: toggle summary" },
     { "<leader>to", open_output, desc = "Neotest: output" },
-    { "<leader>td", run_nearest_dap, desc = "Neotest: nearest (DAP si existe)" },
+    { "<leader>td", run_nearest_dap, desc = "Neotest: nearest (DAP if available)" },
   },
   config = function()
     ---@diagnostic disable-next-line: missing-fields

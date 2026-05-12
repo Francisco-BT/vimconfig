@@ -1,13 +1,53 @@
+-- Carga diferida: no se instala el plugin hasta el primer uso de un <leader>t* (lazy.keys).
+-- Requiere treesitter (ya lo tienes en lazy); no duplicamos dependencia para no forzar orden raro.
+
+local function run_nearest()
+  require("neotest").run.run()
+end
+
+local function run_file()
+  require("neotest").run.run(vim.fn.expand("%"))
+end
+
+local function run_cwd()
+  require("neotest").run.run(vim.fn.getcwd())
+end
+
+local function toggle_summary()
+  require("neotest").summary.toggle()
+end
+
+local function open_output()
+  require("neotest").output.open({ enter = true })
+end
+
+local function run_nearest_dap()
+  local ok = pcall(require, "dap")
+  if not ok then
+    vim.notify("nvim-dap no está cargado: ejecutando test sin DAP", vim.log.levels.WARN)
+    run_nearest()
+    return
+  end
+  require("neotest").run.run({ strategy = "dap" })
+end
+
 return {
   "nvim-neotest/neotest",
+  lazy = true,
   dependencies = {
     "nvim-neotest/nvim-nio",
     "nvim-lua/plenary.nvim",
     "antoinemadec/FixCursorHold.nvim",
-    "nvim-treesitter/nvim-treesitter",
-    -- Adapters
     "nvim-neotest/neotest-jest",
     "marilari88/neotest-vitest",
+  },
+  keys = {
+    { "<leader>tr", run_nearest, desc = "Neotest: nearest test" },
+    { "<leader>ta", run_file, desc = "Neotest: tests in this file" },
+    { "<leader>ts", run_cwd, desc = "Neotest: all tests (cwd)" },
+    { "<leader>tv", toggle_summary, desc = "Neotest: toggle summary" },
+    { "<leader>to", open_output, desc = "Neotest: output" },
+    { "<leader>td", run_nearest_dap, desc = "Neotest: nearest (DAP si existe)" },
   },
   config = function()
     ---@diagnostic disable-next-line: missing-fields
@@ -15,47 +55,16 @@ return {
       adapters = {
         require("neotest-jest")({
           jestCommand = "npm test --",
-          env = { CI = true },
+          env = { CI = "true" },
           cwd = function()
             return vim.fn.getcwd()
           end,
         }),
-        require("neotest-vitest"),
+        require("neotest-vitest")(),
+      },
+      summary = {
+        open = "botright",
       },
     })
-
-    vim.keymap.set("n", "<leader>tr", function()
-      require("neotest").run.run({
-        suite = false,
-        testify = true,
-      })
-    end, { desc = "Debug: Running Nearest Test" })
-
-    vim.keymap.set("n", "<leader>tv", function()
-      require("neotest").summary.toggle()
-    end, { desc = "Debug: Summary Toggle" })
-
-    vim.keymap.set("n", "<leader>ts", function()
-      require("neotest").run.run({
-        suite = true,
-        testify = true,
-      })
-    end, { desc = "Debug: Running Test Suite" })
-
-    vim.keymap.set("n", "<leader>td", function()
-      require("neotest").run.run({
-        suite = false,
-        testify = true,
-        strategy = "dap",
-      })
-    end, { desc = "Debug: Debug Nearest Test" })
-
-    vim.keymap.set("n", "<leader>to", function()
-      require("neotest").output.open()
-    end, { desc = "Debug: Open test output" })
-
-    vim.keymap.set("n", "<leader>ta", function()
-      require("neotest").run.run(vim.fn.getcwd())
-    end, { desc = "Debug: Open test output" })
   end,
 }

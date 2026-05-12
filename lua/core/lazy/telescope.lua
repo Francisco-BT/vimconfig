@@ -40,6 +40,12 @@ return {
       builtin.grep_string({ search = vim.fn.input("Grep > ") })
     end, { desc = "Telescope grep string" })
 
+    vim.keymap.set("n", "<leader>pg", builtin.live_grep, { desc = "Telescope live grep (rg)" })
+
+    vim.keymap.set("n", "<leader>pw", function()
+      builtin.live_grep({ default_text = vim.fn.expand("<cword>") })
+    end, { desc = "Telescope live grep (word under cursor)" })
+
     -- Misma API que :lua vim.lsp.buf.code_action(); ui-select muestra la lista en flotante (tema cursor)
     vim.keymap.set({ "n", "v" }, "<leader>vca", vim.lsp.buf.code_action, {
       desc = "LSP code actions",

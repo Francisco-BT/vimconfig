@@ -1,10 +1,11 @@
---- CursorLine por modo: Insert, Visual, operador pendiente (d/y/c, …).
+--- CursorLine por modo: misma tabla de roles que Rose Pine, pero colores = mezcla
+--- Normal.bg + acento leído del colorscheme activo (no paleta fija).
 ---
 --- vim.g.mode_cursorline_palette = "theme" | "rose_pine" (default: theme)
----   "theme" → Insert / Visual / delete (dD) mezclan CursorLine del tema con un acento leído del mismo colorscheme.
---- vim.g.mode_cursorline_mix        insert (default 0.10), mezcla hacia blanco
---- vim.g.mode_cursorline_mix_visual (default 0.18), acento desde grupo Visual
---- vim.g.mode_cursorline_mix_delete (default 0.20), acento desde DiffDelete / Error / …
+---
+--- Fuerzas opcionales (0–1; por defecto calibradas como la mezcla Rose Pine):
+---   g:mode_cursorline_theme_strength_insert / _visual / _delete / _yank / _change / _other
+--- Legacy: g:mode_cursorline_mix → insert; _mix_visual → visual; _mix_delete → delete
 
 local M = {}
 
@@ -33,7 +34,7 @@ local function rgb_mix(c1, c2, t)
   return r * 65536 + g * 256 + b
 end
 
--- Rose Pine Moon — paleta fija si mode_cursorline_palette = "rose_pine"
+-- Rose Pine Moon — solo cuando palette == "rose_pine"
 local BASE_MOON = 0x232136
 local GOLD_LINE = rgb_mix(BASE_MOON, 0xf6c177, 0.32)
 local PINE_LINE = rgb_mix(BASE_MOON, 0x3e8fb0, 0.22)
@@ -44,6 +45,107 @@ local ROSE_PINE = {
   change_op = rgb_mix(BASE_MOON, 0x9ccfd8, 0.28),
   visual = rgb_mix(BASE_MOON, 0x908caa, 0.18),
   operator_other = rgb_mix(BASE_MOON, 0x6e6a86, 0.14),
+}
+
+--- Por rol: grupos highlight a probar, preferencia fg/bg, fallback hex, fuerza por defecto (como Rose Pine).
+---@type table<string, { groups: string[], prefer: "fg"|"bg", fallback: integer, default: number, gvar: string, legacy?: string }>
+local THEME_BY_ROLE = {
+  insert = {
+    groups = {
+      "@type",
+      "Type",
+      "Directory",
+      "MoreMsg",
+      "Question",
+      "Special",
+      "Identifier",
+      "String",
+      "@string",
+    },
+    prefer = "fg",
+    fallback = 0x458588,
+    default = 0.22,
+    gvar = "mode_cursorline_theme_strength_insert",
+    legacy = "mode_cursorline_mix",
+  },
+  visual = {
+    groups = {
+      "Visual",
+      "VisualNOS",
+      "PmenuSel",
+      "WildMenu",
+      "TabLineSel",
+      "Substitute",
+      "Search",
+    },
+    prefer = "bg",
+    fallback = 0x928374,
+    default = 0.18,
+    gvar = "mode_cursorline_theme_strength_visual",
+    legacy = "mode_cursorline_mix_visual",
+  },
+  delete_op = {
+    groups = {
+      "DiffDelete",
+      "ErrorMsg",
+      "Error",
+      "DiagnosticError",
+      "NvimTreeGitDeleted",
+    },
+    prefer = "bg",
+    fallback = 0xcc241d,
+    default = 0.24,
+    gvar = "mode_cursorline_theme_strength_delete",
+    legacy = "mode_cursorline_mix_delete",
+  },
+  yank_op = {
+    groups = {
+      "Number",
+      "Float",
+      "@number",
+      "@float",
+      "WarningMsg",
+      "Macro",
+      "PreProc",
+      "Tag",
+      "Constant",
+    },
+    prefer = "fg",
+    fallback = 0xd79921,
+    default = 0.32,
+    gvar = "mode_cursorline_theme_strength_yank",
+  },
+  change_op = {
+    groups = {
+      "@function",
+      "Function",
+      "Statement",
+      "Conditional",
+      "Repeat",
+      "Structure",
+      "Operator",
+      "SpecialKey",
+      "Title",
+    },
+    prefer = "fg",
+    fallback = 0x83a598,
+    default = 0.28,
+    gvar = "mode_cursorline_theme_strength_change",
+  },
+  operator_other = {
+    groups = {
+      "Comment",
+      "LineNr",
+      "NonText",
+      "Conceal",
+      "Folded",
+      "Whitespace",
+    },
+    prefer = "fg",
+    fallback = 0x665c54,
+    default = 0.14,
+    gvar = "mode_cursorline_theme_strength_other",
+  },
 }
 
 local function insertish(m)
@@ -103,26 +205,68 @@ local function restore_theme_cursorline()
   end
 end
 
---- First usable RGB from highlight (bg preferred, then fg).
----@param name string
+--- Parse "#RRGGBB" or "RRGGBB" to 24-bit int (for synIDattr).
+---@param s string|nil
 ---@return integer|nil
-local function hl_accent_rgb(name)
-  local h = vim.api.nvim_get_hl(0, { name = name, link = true })
-  if h.bg then
-    return h.bg
+local function hex_to_rgb(s)
+  if type(s) ~= "string" or s == "" then
+    return nil
   end
-  if h.fg then
-    return h.fg
+  s = s:gsub("^#", "")
+  if #s ~= 6 then
+    return nil
   end
-  return nil
+  local n = tonumber(s, 16)
+  if not n then
+    return nil
+  end
+  return n
+end
+
+--- Resolved GUI color (nvim_get_hl with link=false + synIDattr fallback).
+---@param name string
+---@param prefer "fg"|"bg"
+---@return integer|nil
+local function hl_rgb(name, prefer)
+  -- link=false → colores efectivos tras resolver links (link=true suele omitir fg/bg).
+  local h = vim.api.nvim_get_hl(0, { name = name, link = false })
+  if prefer == "fg" then
+    if h.fg then
+      return h.fg
+    end
+    if h.bg then
+      return h.bg
+    end
+  else
+    if h.bg then
+      return h.bg
+    end
+    if h.fg then
+      return h.fg
+    end
+  end
+
+  local id = vim.fn.hlID(name)
+  if id == 0 then
+    return nil
+  end
+  local tid = vim.fn.synIDtrans(id)
+  local attr = vim.fn.synIDattr(tid, prefer == "fg" and "fg#" or "bg#", "gui")
+  local parsed = hex_to_rgb(attr)
+  if parsed then
+    return parsed
+  end
+  attr = vim.fn.synIDattr(tid, prefer == "fg" and "bg#" or "fg#", "gui")
+  return hex_to_rgb(attr)
 end
 
 ---@param names string[]
+---@param prefer "fg"|"bg"
 ---@param fallback integer
 ---@return integer
-local function pick_first_rgb(names, fallback)
+local function pick_first(names, prefer, fallback)
   for _, n in ipairs(names) do
-    local c = hl_accent_rgb(n)
+    local c = hl_rgb(n, prefer)
     if c then
       return c
     end
@@ -130,28 +274,45 @@ local function pick_first_rgb(names, fallback)
   return fallback
 end
 
-local function base_cursorline_bg()
+local function theme_canvas_bg()
+  if normal_bg then
+    return normal_bg
+  end
   if cursorline_theme and cursorline_theme.bg then
     return cursorline_theme.bg
   end
-  return normal_bg
+  return nil
 end
 
---- Mix theme CursorLine (or Normal) bg toward accent by t in [0,1].
 ---@param accent integer
----@param t number
+---@param strength number
 ---@return boolean
-local function apply_theme_tint(accent, t)
-  local base = base_cursorline_bg()
-  if not base or not accent or type(t) ~= "number" then
+local function apply_theme_semantic_line(accent, strength)
+  local base = theme_canvas_bg()
+  if not base or not accent or type(strength) ~= "number" then
     return false
   end
-  local tinted = rgb_mix(base, accent, t)
+  local tinted = rgb_mix(base, accent, strength)
   local hl = vim.deepcopy(cursorline_theme or {})
   hl.bg = tinted
   hl.default = false
   vim.api.nvim_set_hl(0, "CursorLine", hl)
   return true
+end
+
+---@param spec { gvar: string, legacy?: string, default: number }
+local function resolve_strength(spec)
+  local v = vim.g[spec.gvar]
+  if type(v) == "number" then
+    return v
+  end
+  if spec.legacy then
+    local leg = vim.g[spec.legacy]
+    if type(leg) == "number" then
+      return leg
+    end
+  end
+  return spec.default
 end
 
 function M._apply()
@@ -168,31 +329,11 @@ function M._apply()
   end
 
   if palette == "theme" then
-    if role == "insert" then
-      local mix = vim.g.mode_cursorline_mix
-      if type(mix) ~= "number" then
-        mix = 0.10
-      end
-      apply_theme_tint(0xffffff, mix)
-    elseif role == "visual" then
-      local mix = vim.g.mode_cursorline_mix_visual
-      if type(mix) ~= "number" then
-        mix = 0.18
-      end
-      local accent = pick_first_rgb({ "Visual", "PmenuSel", "WildMenu" }, 0x7c6f64)
-      apply_theme_tint(accent, mix)
-    elseif role == "delete_op" then
-      local mix = vim.g.mode_cursorline_mix_delete
-      if type(mix) ~= "number" then
-        mix = 0.20
-      end
-      local accent = pick_first_rgb({
-        "DiffDelete",
-        "ErrorMsg",
-        "Error",
-        "DiagnosticError",
-      }, 0xcc241d)
-      apply_theme_tint(accent, mix)
+    local spec = THEME_BY_ROLE[role]
+    if spec then
+      local accent = pick_first(spec.groups, spec.prefer, spec.fallback)
+      local strength = resolve_strength(spec)
+      apply_theme_semantic_line(accent, strength)
     else
       restore_theme_cursorline()
     end

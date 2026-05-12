@@ -1,9 +1,10 @@
 --- CursorLine por modo: Insert, Visual, operador pendiente (d/y/c, …).
---- Paleta fija Rose Pine Moon (solo oscuro; sin rama light).
 ---
 --- vim.g.mode_cursorline_palette = "theme" | "rose_pine" (default: theme)
----   "theme" → solo Insert/Replace mezcla con el tema; resto como el tema.
---- vim.g.mode_cursorline_mix  (solo palette "theme", insert): 0.08–0.12
+---   "theme" → Insert / Visual / delete (dD) mezclan CursorLine del tema con un acento leído del mismo colorscheme.
+--- vim.g.mode_cursorline_mix        insert (default 0.10), mezcla hacia blanco
+--- vim.g.mode_cursorline_mix_visual (default 0.18), acento desde grupo Visual
+--- vim.g.mode_cursorline_mix_delete (default 0.20), acento desde DiffDelete / Error / …
 
 local M = {}
 
@@ -32,17 +33,17 @@ local function rgb_mix(c1, c2, t)
   return r * 65536 + g * 256 + b
 end
 
--- Rose Pine Moon — insert = pine (antes yank); yank = gold (antes insert)
+-- Rose Pine Moon — paleta fija si mode_cursorline_palette = "rose_pine"
 local BASE_MOON = 0x232136
 local GOLD_LINE = rgb_mix(BASE_MOON, 0xf6c177, 0.32)
 local PINE_LINE = rgb_mix(BASE_MOON, 0x3e8fb0, 0.22)
 local ROSE_PINE = {
   insert = PINE_LINE,
-  delete_op = rgb_mix(BASE_MOON, 0xeb6f92, 0.24), -- love
+  delete_op = rgb_mix(BASE_MOON, 0xeb6f92, 0.24),
   yank_op = GOLD_LINE,
-  change_op = rgb_mix(BASE_MOON, 0x9ccfd8, 0.28), -- foam (azul cian, como keyword Lua)
-  visual = rgb_mix(BASE_MOON, 0x908caa, 0.18), -- subtle
-  operator_other = rgb_mix(BASE_MOON, 0x6e6a86, 0.14), -- muted
+  change_op = rgb_mix(BASE_MOON, 0x9ccfd8, 0.28),
+  visual = rgb_mix(BASE_MOON, 0x908caa, 0.18),
+  operator_other = rgb_mix(BASE_MOON, 0x6e6a86, 0.14),
 }
 
 local function insertish(m)
@@ -102,20 +103,55 @@ local function restore_theme_cursorline()
   end
 end
 
-local function apply_theme_insert_tint()
-  local mix = vim.g.mode_cursorline_mix
-  if type(mix) ~= "number" then
-    mix = 0.10
+--- First usable RGB from highlight (bg preferred, then fg).
+---@param name string
+---@return integer|nil
+local function hl_accent_rgb(name)
+  local h = vim.api.nvim_get_hl(0, { name = name, link = true })
+  if h.bg then
+    return h.bg
   end
-  local base_bg = cursorline_theme and cursorline_theme.bg or normal_bg
-  if not base_bg then
-    return
+  if h.fg then
+    return h.fg
   end
-  local tinted = rgb_mix(base_bg, 0xffffff, mix)
+  return nil
+end
+
+---@param names string[]
+---@param fallback integer
+---@return integer
+local function pick_first_rgb(names, fallback)
+  for _, n in ipairs(names) do
+    local c = hl_accent_rgb(n)
+    if c then
+      return c
+    end
+  end
+  return fallback
+end
+
+local function base_cursorline_bg()
+  if cursorline_theme and cursorline_theme.bg then
+    return cursorline_theme.bg
+  end
+  return normal_bg
+end
+
+--- Mix theme CursorLine (or Normal) bg toward accent by t in [0,1].
+---@param accent integer
+---@param t number
+---@return boolean
+local function apply_theme_tint(accent, t)
+  local base = base_cursorline_bg()
+  if not base or not accent or type(t) ~= "number" then
+    return false
+  end
+  local tinted = rgb_mix(base, accent, t)
   local hl = vim.deepcopy(cursorline_theme or {})
   hl.bg = tinted
   hl.default = false
   vim.api.nvim_set_hl(0, "CursorLine", hl)
+  return true
 end
 
 function M._apply()
@@ -133,14 +169,36 @@ function M._apply()
 
   if palette == "theme" then
     if role == "insert" then
-      apply_theme_insert_tint()
+      local mix = vim.g.mode_cursorline_mix
+      if type(mix) ~= "number" then
+        mix = 0.10
+      end
+      apply_theme_tint(0xffffff, mix)
+    elseif role == "visual" then
+      local mix = vim.g.mode_cursorline_mix_visual
+      if type(mix) ~= "number" then
+        mix = 0.18
+      end
+      local accent = pick_first_rgb({ "Visual", "PmenuSel", "WildMenu" }, 0x7c6f64)
+      apply_theme_tint(accent, mix)
+    elseif role == "delete_op" then
+      local mix = vim.g.mode_cursorline_mix_delete
+      if type(mix) ~= "number" then
+        mix = 0.20
+      end
+      local accent = pick_first_rgb({
+        "DiffDelete",
+        "ErrorMsg",
+        "Error",
+        "DiagnosticError",
+      }, 0xcc241d)
+      apply_theme_tint(accent, mix)
     else
       restore_theme_cursorline()
     end
     return
   end
 
-  -- rose_pine: fixed CursorLine bg per role (ignores current colorscheme)
   local bg = ROSE_PINE[role]
   if not bg then
     restore_theme_cursorline()

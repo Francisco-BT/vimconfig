@@ -1,7 +1,7 @@
 --- CursorLine por modo: Insert, Visual, operador pendiente (d/y/c, …).
 --- Paleta fija Rose Pine Moon (solo oscuro; sin rama light).
 ---
---- vim.g.mode_cursorline_palette = "rose_pine" | "theme"
+--- vim.g.mode_cursorline_palette = "theme" | "rose_pine" (default: theme)
 ---   "theme" → solo Insert/Replace mezcla con el tema; resto como el tema.
 --- vim.g.mode_cursorline_mix  (solo palette "theme", insert): 0.08–0.12
 
@@ -124,7 +124,7 @@ function M._apply()
   end
 
   local role = classify()
-  local palette = vim.g.mode_cursorline_palette or "rose_pine"
+  local palette = vim.g.mode_cursorline_palette or "theme"
 
   if role == "normal" then
     restore_theme_cursorline()
@@ -140,7 +140,7 @@ function M._apply()
     return
   end
 
-  -- rose_pine (default): fixed CursorLine bg per role
+  -- rose_pine: fixed CursorLine bg per role (ignores current colorscheme)
   local bg = ROSE_PINE[role]
   if not bg then
     restore_theme_cursorline()
@@ -158,7 +158,7 @@ end
 
 function M.setup()
   if vim.g.mode_cursorline_palette == nil then
-    vim.g.mode_cursorline_palette = "rose_pine"
+    vim.g.mode_cursorline_palette = "theme"
   end
 
   local aug = vim.api.nvim_create_augroup("mode_cursorline", { clear = true })

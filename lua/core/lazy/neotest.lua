@@ -5,6 +5,18 @@
 -- cwd = nearest package.json to the buffer; runner prefix from pnpm|yarn|npm|bun via lockfile.
 -- Test tree parsing: :TSInstall javascript typescript (tsx if needed). Adapters only apply
 -- when that package's package.json lists jest and/or vitest in dependencies.
+--
+-- Optional per-repo overrides: walk up from the buffer dir for the first file named
+-- `.neotest.json` or `.nvim/neotest.json` (JSON). Example:
+--   {
+--     "jest": {
+--       "command": "doppler run --project qnr-server --config tst -- yarn workspace @sb/server jest",
+--       "env": { "CI": "vscode-jest-tests", "DEBUG": "safebase:*" },
+--       "cwd": "apps/server"
+--     },
+--     "vitest": { "command": "yarn workspace @sb/web vitest run", "env": {}, "cwd": "apps/web" }
+--   }
+-- `cwd` is optional; if relative, it is resolved against the directory containing the override file.
 
 -- lazy.nvim registers `{"nvim-neotest/neotest", ...}` under the short id `neotest`
 -- (repo name after `/`), not the full GitHub string — so `lazy.load` must use that id.
@@ -88,6 +100,62 @@ local function package_manager_exec()
     return "bunx"
   end
   return "npx"
+end
+
+--- @return string|nil path to first `.neotest.json` or `.nvim/neotest.json` walking up from buffer dir.
+local function find_neotest_override_path()
+  local buf = vim.api.nvim_buf_get_name(0)
+  local dir = buf ~= "" and vim.fn.fnamemodify(buf, ":p:h") or uv.cwd()
+  local names = { ".neotest.json", joinpath(".nvim", "neotest.json") }
+  while dir and dir ~= "" do
+    for _, rel in ipairs(names) do
+      local p = joinpath(dir, rel)
+      if vim.fn.filereadable(p) == 1 then
+        return vim.fn.fnamemodify(p, ":p")
+      end
+    end
+    local parent = vim.fn.fnamemodify(dir, ":h")
+    if parent == dir or dir == stop_dir then
+      break
+    end
+    dir = parent
+  end
+  return nil
+end
+
+local override_cache = { path = nil, mtime = -1, data = nil, dir = nil }
+
+--- @return { data: table, dir: string|nil }
+local function load_neotest_overrides()
+  local path = find_neotest_override_path()
+  if not path then
+    override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = nil, -1, {}, nil
+    return { data = {}, dir = nil }
+  end
+  local mtime = vim.fn.getftime(path)
+  if path == override_cache.path and mtime == override_cache.mtime and override_cache.data then
+    return { data = override_cache.data, dir = override_cache.dir }
+  end
+  local lines = vim.fn.readfile(path)
+  local text = table.concat(lines, "\n")
+  local ok, data = pcall(vim.json.decode, text, { luanil = { object = true } })
+  if not ok or type(data) ~= "table" then
+    vim.notify("neotest: invalid or empty JSON in " .. path .. ": " .. tostring(data), vim.log.levels.WARN)
+    data = {}
+  end
+  local dir = vim.fn.fnamemodify(path, ":p:h")
+  override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = path, mtime, data, dir
+  return { data = data, dir = dir }
+end
+
+local function resolve_override_cwd(override_dir, cwd_spec)
+  if type(cwd_spec) ~= "string" or cwd_spec == "" or not override_dir then
+    return nil
+  end
+  if vim.startswith(cwd_spec, "/") then
+    return vim.fn.fnamemodify(cwd_spec, ":p")
+  end
+  return vim.fn.fnamemodify(joinpath(override_dir, cwd_spec), ":p")
 end
 
 --- Build a jest/vitest adapter instance. Factories use `__call(_, opts)` and index `opts`
@@ -188,14 +256,36 @@ return {
     local jest_ok, jest_adapter = pcall(function()
       return build_adapter("neotest-jest", {
         jestCommand = function()
+          local loaded = load_neotest_overrides()
+          local j = loaded.data.jest
+          if type(j) == "table" and type(j.command) == "string" and vim.fn.trim(j.command) ~= "" then
+            return vim.fn.trim(j.command)
+          end
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
             return "yarn jest"
           end
           return prefix .. " jest"
         end,
-        env = { CI = "true", NODE_ENV = "test" },
+        env = function(specEnv)
+          specEnv = type(specEnv) == "table" and specEnv or {}
+          local base = { CI = "true", NODE_ENV = "test" }
+          local loaded = load_neotest_overrides()
+          local j = loaded.data.jest
+          if type(j) == "table" and type(j.env) == "table" then
+            vim.tbl_extend("force", base, j.env)
+          end
+          return vim.tbl_extend("force", base, specEnv)
+        end,
         cwd = function()
+          local loaded = load_neotest_overrides()
+          local j = loaded.data.jest
+          if type(j) == "table" and type(j.cwd) == "string" then
+            local resolved = resolve_override_cwd(loaded.dir, j.cwd)
+            if resolved then
+              return resolved
+            end
+          end
           return js_project_root()
         end,
       })
@@ -209,6 +299,11 @@ return {
     local vitest_ok, vitest_adapter = pcall(function()
       return build_adapter("neotest-vitest", {
         vitestCommand = function()
+          local loaded = load_neotest_overrides()
+          local v = loaded.data.vitest
+          if type(v) == "table" and type(v.command) == "string" and vim.fn.trim(v.command) ~= "" then
+            return vim.fn.trim(v.command)
+          end
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
             return "yarn vitest run"
@@ -218,8 +313,25 @@ return {
           end
           return prefix .. " vitest run"
         end,
-        env = { CI = "true", NODE_ENV = "test" },
+        env = function(specEnv)
+          specEnv = type(specEnv) == "table" and specEnv or {}
+          local base = { CI = "true", NODE_ENV = "test" }
+          local loaded = load_neotest_overrides()
+          local v = loaded.data.vitest
+          if type(v) == "table" and type(v.env) == "table" then
+            vim.tbl_extend("force", base, v.env)
+          end
+          return vim.tbl_extend("force", base, specEnv)
+        end,
         cwd = function()
+          local loaded = load_neotest_overrides()
+          local v = loaded.data.vitest
+          if type(v) == "table" and type(v.cwd) == "string" then
+            local resolved = resolve_override_cwd(loaded.dir, v.cwd)
+            if resolved then
+              return resolved
+            end
+          end
           return js_project_root()
         end,
       })

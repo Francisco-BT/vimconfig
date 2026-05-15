@@ -17,6 +17,8 @@
 --     "vitest": { "command": "yarn workspace @sb/web vitest run", "env": {}, "cwd": "apps/web" }
 --   }
 -- `cwd` is optional; if relative, it is resolved against the directory containing the override file.
+-- neotest-jest may call env/command from an async (fast) context: no API buffer reads then; we
+-- cache overrides after a normal resolve (e.g. when you use the keymaps) and reuse that snapshot.
 
 -- lazy.nvim registers `{"nvim-neotest/neotest", ...}` under the short id `neotest`
 -- (repo name after `/`), not the full GitHub string — so `lazy.load` must use that id.
@@ -82,7 +84,12 @@ local function lockfile_root(from_dir)
   return from_dir
 end
 
+local override_cache = { path = nil, mtime = -1, data = nil, dir = nil, ready = false }
+
 local function js_project_root()
+  if vim.in_fast_event() then
+    return nearest_package_root(uv.cwd())
+  end
   local buf = vim.api.nvim_buf_get_name(0)
   return nearest_package_root((buf ~= "" and buf) or uv.cwd())
 end
@@ -104,8 +111,13 @@ end
 
 --- @return string|nil path to first `.neotest.json` or `.nvim/neotest.json` walking up from buffer dir.
 local function find_neotest_override_path()
-  local buf = vim.api.nvim_buf_get_name(0)
-  local dir = buf ~= "" and vim.fn.fnamemodify(buf, ":p:h") or uv.cwd()
+  local dir
+  if vim.in_fast_event() then
+    dir = uv.cwd()
+  else
+    local buf = vim.api.nvim_buf_get_name(0)
+    dir = buf ~= "" and vim.fn.fnamemodify(buf, ":p:h") or uv.cwd()
+  end
   local names = { ".neotest.json", joinpath(".nvim", "neotest.json") }
   while dir and dir ~= "" do
     for _, rel in ipairs(names) do
@@ -123,17 +135,24 @@ local function find_neotest_override_path()
   return nil
 end
 
-local override_cache = { path = nil, mtime = -1, data = nil, dir = nil }
-
 --- @return { data: table, dir: string|nil }
 local function load_neotest_overrides()
+  if vim.in_fast_event() then
+    if override_cache.ready then
+      return { data = override_cache.data or {}, dir = override_cache.dir }
+    end
+    return { data = {}, dir = nil }
+  end
+
   local path = find_neotest_override_path()
   if not path then
     override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = nil, -1, {}, nil
+    override_cache.ready = true
     return { data = {}, dir = nil }
   end
   local mtime = vim.fn.getftime(path)
   if path == override_cache.path and mtime == override_cache.mtime and override_cache.data then
+    override_cache.ready = true
     return { data = override_cache.data, dir = override_cache.dir }
   end
   local lines = vim.fn.readfile(path)
@@ -145,6 +164,7 @@ local function load_neotest_overrides()
   end
   local dir = vim.fn.fnamemodify(path, ":p:h")
   override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = path, mtime, data, dir
+  override_cache.ready = true
   return { data = data, dir = dir }
 end
 
@@ -188,6 +208,9 @@ local function ensure_neotest()
     end
   end
   local nt = require("neotest")
+  if not vim.in_fast_event() then
+    pcall(load_neotest_overrides)
+  end
   if nt.run == nil then
     vim.notify(
       "Neotest is not ready (setup did not run or failed). Check :messages and :Lazy.",

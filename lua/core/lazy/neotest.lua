@@ -21,16 +21,6 @@ local function open_output()
   require("neotest").output.open({ enter = true })
 end
 
-local function run_nearest_dap()
-  local ok = pcall(require, "dap")
-  if not ok then
-    vim.notify("nvim-dap not loaded; running test without DAP", vim.log.levels.WARN)
-    run_nearest()
-    return
-  end
-  require("neotest").run.run({ strategy = "dap" })
-end
-
 return {
   "nvim-neotest/neotest",
   lazy = true,
@@ -47,7 +37,6 @@ return {
     { "<leader>ts", run_cwd, desc = "Neotest: all tests (cwd)" },
     { "<leader>tv", toggle_summary, desc = "Neotest: toggle summary" },
     { "<leader>to", open_output, desc = "Neotest: output" },
-    { "<leader>td", run_nearest_dap, desc = "Neotest: nearest (DAP if available)" },
   },
   config = function()
     ---@diagnostic disable-next-line: missing-fields

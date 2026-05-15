@@ -90,21 +90,25 @@ local function package_manager_exec()
   return "npx"
 end
 
---- neotest-jest / neotest-vitest `__call(_, opts)` indexes `opts` immediately. A bare
---- `require("neotest-vitest")()` (no table) passes nil and breaks neotest's `config`, so
---- `setup` never runs and `require("neotest").run` stays nil. Default opts once.
-local function patch_adapter_default_opts(modname)
+--- Build a jest/vitest adapter instance. Factories use `__call(_, opts)` and index `opts`
+--- immediately; a nil opts breaks config. Patch `__call` once, then invoke the metamethod
+--- with an explicit options table (never rely on a bare `factory()` call).
+local function build_adapter(modname, opts)
+  assert(type(opts) == "table", modname .. ": adapter options must be a table")
   local mod = require(modname)
   local mt = getmetatable(mod)
-  if not (mt and mt.__call) or mt.__neotest_opts_patched then
-    return mod
+  if not (mt and mt.__call) then
+    error(modname .. ": expected a callable adapter factory (metatable.__call)")
   end
-  local orig = mt.__call
-  mt.__call = function(t, opts)
-    return orig(t, opts or {})
+  if not mt.__neotest_opts_patched then
+    local orig = mt.__call
+    mt.__call = function(t, o)
+      local safe = type(o) == "table" and o or {}
+      return orig(t, safe)
+    end
+    mt.__neotest_opts_patched = true
   end
-  mt.__neotest_opts_patched = true
-  return mod
+  return mt.__call(mod, opts)
 end
 
 local function ensure_neotest()
@@ -182,7 +186,7 @@ return {
     local adapters = {}
 
     local jest_ok, jest_adapter = pcall(function()
-      return patch_adapter_default_opts("neotest-jest")({
+      return build_adapter("neotest-jest", {
         jestCommand = function()
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
@@ -203,7 +207,7 @@ return {
     end
 
     local vitest_ok, vitest_adapter = pcall(function()
-      return patch_adapter_default_opts("neotest-vitest")({
+      return build_adapter("neotest-vitest", {
         vitestCommand = function()
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then

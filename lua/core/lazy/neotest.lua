@@ -186,6 +186,65 @@ local function resolve_override_cwd(override_dir, cwd_spec)
   return vim.fn.fnamemodify(joinpath(override_dir, cwd_spec), ":p")
 end
 
+local DEFAULT_TEST_ENV = { CI = "true", NODE_ENV = "test" }
+
+local function default_jest_command()
+  local prefix = package_manager_exec()
+  if prefix == "yarn exec" then
+    return "yarn jest"
+  end
+  return prefix .. " jest"
+end
+
+local function default_vitest_command()
+  local prefix = package_manager_exec()
+  if prefix == "yarn exec" then
+    return "yarn vitest run"
+  end
+  if prefix == "bunx" then
+    return "bunx vitest run"
+  end
+  return prefix .. " vitest run"
+end
+
+--- @param section `"jest"` | `"vitest"` key under `.neotest.json`
+local function override_command_from_config(section)
+  local loaded = load_neotest_overrides()
+  local block = loaded.data[section]
+  if type(block) == "table" and type(block.command) == "string" then
+    local cmd = str_trim(block.command)
+    if cmd ~= "" then
+      return cmd
+    end
+  end
+  return nil
+end
+
+--- @param section `"jest"` | `"vitest"`
+local function merge_adapter_env(specEnv, section)
+  specEnv = type(specEnv) == "table" and specEnv or {}
+  local base = vim.tbl_extend("force", {}, DEFAULT_TEST_ENV)
+  local loaded = load_neotest_overrides()
+  local block = loaded.data[section]
+  if type(block) == "table" and type(block.env) == "table" then
+    vim.tbl_extend("force", base, block.env)
+  end
+  return vim.tbl_extend("force", base, specEnv)
+end
+
+--- @param section `"jest"` | `"vitest"`
+local function adapter_cwd_from_config(section)
+  local loaded = load_neotest_overrides()
+  local block = loaded.data[section]
+  if type(block) == "table" and type(block.cwd) == "string" then
+    local resolved = resolve_override_cwd(loaded.dir, block.cwd)
+    if resolved then
+      return resolved
+    end
+  end
+  return js_project_root()
+end
+
 --- Build a jest/vitest adapter instance. Factories use `__call(_, opts)` and index `opts`
 --- immediately; a nil opts breaks config. Patch `__call` once, then invoke the metamethod
 --- with an explicit options table (never rely on a bare `factory()` call).
@@ -229,39 +288,41 @@ local function ensure_neotest()
   return nt
 end
 
-local function run_nearest()
+local function with_neotest(fn)
   local nt = ensure_neotest()
   if nt then
-    nt.run.run()
+    fn(nt)
   end
+end
+
+local function run_nearest()
+  with_neotest(function(nt)
+    nt.run.run()
+  end)
 end
 
 local function run_file()
-  local nt = ensure_neotest()
-  if nt then
+  with_neotest(function(nt)
     nt.run.run(vim.fn.expand("%"))
-  end
+  end)
 end
 
 local function run_cwd()
-  local nt = ensure_neotest()
-  if nt then
+  with_neotest(function(nt)
     nt.run.run(js_project_root())
-  end
+  end)
 end
 
 local function toggle_summary()
-  local nt = ensure_neotest()
-  if nt then
+  with_neotest(function(nt)
     nt.summary.toggle()
-  end
+  end)
 end
 
 local function open_output()
-  local nt = ensure_neotest()
-  if nt then
+  with_neotest(function(nt)
     nt.output.open({ enter = true })
-  end
+  end)
 end
 
 return {
@@ -284,94 +345,38 @@ return {
   config = function()
     local adapters = {}
 
-    local jest_ok, jest_adapter = pcall(function()
-      return build_adapter("neotest-jest", {
-        jestCommand = function()
-          local loaded = load_neotest_overrides()
-          local j = loaded.data.jest
-          if type(j) == "table" and type(j.command) == "string" and str_trim(j.command) ~= "" then
-            return str_trim(j.command)
-          end
-          local prefix = package_manager_exec()
-          if prefix == "yarn exec" then
-            return "yarn jest"
-          end
-          return prefix .. " jest"
-        end,
-        env = function(specEnv)
-          specEnv = type(specEnv) == "table" and specEnv or {}
-          local base = { CI = "true", NODE_ENV = "test" }
-          local loaded = load_neotest_overrides()
-          local j = loaded.data.jest
-          if type(j) == "table" and type(j.env) == "table" then
-            vim.tbl_extend("force", base, j.env)
-          end
-          return vim.tbl_extend("force", base, specEnv)
-        end,
-        cwd = function()
-          local loaded = load_neotest_overrides()
-          local j = loaded.data.jest
-          if type(j) == "table" and type(j.cwd) == "string" then
-            local resolved = resolve_override_cwd(loaded.dir, j.cwd)
-            if resolved then
-              return resolved
-            end
-          end
-          return js_project_root()
-        end,
-      })
-    end)
-    if jest_ok then
-      adapters[#adapters + 1] = jest_adapter
-    else
-      vim.notify("neotest-jest: " .. tostring(jest_adapter), vim.log.levels.WARN)
+    local function try_adapter(label, modname, opts)
+      local ok, adapter = pcall(build_adapter, modname, opts)
+      if ok then
+        adapters[#adapters + 1] = adapter
+      else
+        vim.notify(label .. ": " .. tostring(adapter), vim.log.levels.WARN)
+      end
     end
 
-    local vitest_ok, vitest_adapter = pcall(function()
-      return build_adapter("neotest-vitest", {
-        vitestCommand = function()
-          local loaded = load_neotest_overrides()
-          local v = loaded.data.vitest
-          if type(v) == "table" and type(v.command) == "string" and str_trim(v.command) ~= "" then
-            return str_trim(v.command)
-          end
-          local prefix = package_manager_exec()
-          if prefix == "yarn exec" then
-            return "yarn vitest run"
-          end
-          if prefix == "bunx" then
-            return "bunx vitest run"
-          end
-          return prefix .. " vitest run"
-        end,
-        env = function(specEnv)
-          specEnv = type(specEnv) == "table" and specEnv or {}
-          local base = { CI = "true", NODE_ENV = "test" }
-          local loaded = load_neotest_overrides()
-          local v = loaded.data.vitest
-          if type(v) == "table" and type(v.env) == "table" then
-            vim.tbl_extend("force", base, v.env)
-          end
-          return vim.tbl_extend("force", base, specEnv)
-        end,
-        cwd = function()
-          local loaded = load_neotest_overrides()
-          local v = loaded.data.vitest
-          if type(v) == "table" and type(v.cwd) == "string" then
-            local resolved = resolve_override_cwd(loaded.dir, v.cwd)
-            if resolved then
-              return resolved
-            end
-          end
-          return js_project_root()
-        end,
-      })
-    end)
-    if vitest_ok then
-      adapters[#adapters + 1] = vitest_adapter
-    else
-      vim.notify("neotest-vitest: " .. tostring(vitest_adapter), vim.log.levels.WARN)
-    end
+    try_adapter("neotest-jest", "neotest-jest", {
+      jestCommand = function()
+        return override_command_from_config("jest") or default_jest_command()
+      end,
+      env = function(specEnv)
+        return merge_adapter_env(specEnv, "jest")
+      end,
+      cwd = function()
+        return adapter_cwd_from_config("jest")
+      end,
+    })
+
+    try_adapter("neotest-vitest", "neotest-vitest", {
+      vitestCommand = function()
+        return override_command_from_config("vitest") or default_vitest_command()
+      end,
+      env = function(specEnv)
+        return merge_adapter_env(specEnv, "vitest")
+      end,
+      cwd = function()
+        return adapter_cwd_from_config("vitest")
+      end,
+    })
 
     ---@diagnostic disable-next-line: missing-fields
     local setup_ok, setup_err = pcall(require("neotest").setup, {

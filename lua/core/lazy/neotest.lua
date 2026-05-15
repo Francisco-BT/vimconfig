@@ -10,7 +10,12 @@
 -- (repo name after `/`), not the full GitHub string — so `lazy.load` must use that id.
 
 local function neotest_lazy_plugin_id()
-  local plugins = require("lazy.core.config").plugins
+  local ok, plugins = pcall(function()
+    return require("lazy.core.config").plugins
+  end)
+  if not ok or type(plugins) ~= "table" then
+    return nil
+  end
   for _, id in ipairs({ "neotest", "nvim-neotest/neotest" }) do
     if plugins[id] then
       return id
@@ -20,7 +25,16 @@ local function neotest_lazy_plugin_id()
 end
 
 local uv = vim.uv or vim.loop
-local stop_dir = vim.env.HOME
+local stop_dir = vim.env.HOME or uv.os_homedir() or "/"
+
+--- vim.fs.joinpath is Neovim 0.10+; keep 0.9.x working on a second machine.
+local function joinpath(a, b)
+  if vim.fs and vim.fs.joinpath then
+    return vim.fs.joinpath(a, b)
+  end
+  local sep = package.config:sub(1, 1) == "\\" and "\\" or "/"
+  return (tostring(a):gsub("[/\\]+$", "")) .. sep .. tostring(b):gsub("^[/\\]+", ""))
+end
 
 local function nearest_package_root(path)
   local start
@@ -64,14 +78,13 @@ end
 local function package_manager_exec()
   local pkg = js_project_root()
   local root = lockfile_root(pkg)
-  local join = vim.fs.joinpath
-  if vim.fn.filereadable(join(root, "pnpm-lock.yaml")) == 1 then
+  if vim.fn.filereadable(joinpath(root, "pnpm-lock.yaml")) == 1 then
     return "pnpm exec"
   end
-  if vim.fn.filereadable(join(root, "yarn.lock")) == 1 or vim.fn.filereadable(join(root, ".yarnrc.yml")) == 1 then
+  if vim.fn.filereadable(joinpath(root, "yarn.lock")) == 1 or vim.fn.filereadable(joinpath(root, ".yarnrc.yml")) == 1 then
     return "yarn exec"
   end
-  if vim.fn.filereadable(join(root, "bun.lock")) == 1 or vim.fn.filereadable(join(root, "bun.lockb")) == 1 then
+  if vim.fn.filereadable(joinpath(root, "bun.lock")) == 1 or vim.fn.filereadable(joinpath(root, "bun.lockb")) == 1 then
     return "bunx"
   end
   return "npx"

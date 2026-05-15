@@ -33,7 +33,7 @@ local function joinpath(a, b)
     return vim.fs.joinpath(a, b)
   end
   local sep = package.config:sub(1, 1) == "\\" and "\\" or "/"
-  return (tostring(a):gsub("[/\\]+$", "")) .. sep .. tostring(b):gsub("^[/\\]+", ""))
+  return (tostring(a):gsub("[/\\]+$", "")) .. sep .. tostring(b):gsub("^[/\\]+", "")
 end
 
 local function nearest_package_root(path)

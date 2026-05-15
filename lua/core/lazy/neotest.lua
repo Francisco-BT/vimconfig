@@ -50,6 +50,14 @@ local function joinpath(a, b)
   return (tostring(a):gsub("[/\\]+$", "")) .. sep .. tostring(b):gsub("^[/\\]+", "")
 end
 
+--- Pure Lua trim (no vim.fn); adapter command hooks run in nvim-nio fast events.
+local function str_trim(s)
+  if type(s) ~= "string" then
+    return ""
+  end
+  return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
 local function nearest_package_root(path)
   local start
   if not path or path == "" then
@@ -281,8 +289,8 @@ return {
         jestCommand = function()
           local loaded = load_neotest_overrides()
           local j = loaded.data.jest
-          if type(j) == "table" and type(j.command) == "string" and vim.fn.trim(j.command) ~= "" then
-            return vim.fn.trim(j.command)
+          if type(j) == "table" and type(j.command) == "string" and str_trim(j.command) ~= "" then
+            return str_trim(j.command)
           end
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
@@ -324,8 +332,8 @@ return {
         vitestCommand = function()
           local loaded = load_neotest_overrides()
           local v = loaded.data.vitest
-          if type(v) == "table" and type(v.command) == "string" and vim.fn.trim(v.command) ~= "" then
-            return vim.fn.trim(v.command)
+          if type(v) == "table" and type(v.command) == "string" and str_trim(v.command) ~= "" then
+            return str_trim(v.command)
           end
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then

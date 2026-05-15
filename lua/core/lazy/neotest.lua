@@ -1,7 +1,23 @@
 -- Mappings call `lazy.load` first so `config` runs and `neotest.setup()` attaches
 -- consumers (`run`, `summary`, …). Otherwise `require("neotest").run` is nil.
+--
+-- Typical frontend stacks: Jest (incl. next/jest) and Vitest (e.g. with Vite).
+-- cwd = nearest package.json to the buffer; runner prefix from pnpm|yarn|npm|bun via lockfile.
+-- Test tree parsing: :TSInstall javascript typescript (tsx if needed). Adapters only apply
+-- when that package's package.json lists jest and/or vitest in dependencies.
 
-local NEOTEST_PLUGIN = "nvim-neotest/neotest"
+-- lazy.nvim registers `{"nvim-neotest/neotest", ...}` under the short id `neotest`
+-- (repo name after `/`), not the full GitHub string — so `lazy.load` must use that id.
+
+local function neotest_lazy_plugin_id()
+  local plugins = require("lazy.core.config").plugins
+  for _, id in ipairs({ "neotest", "nvim-neotest/neotest" }) do
+    if plugins[id] then
+      return id
+    end
+  end
+  return nil
+end
 
 local uv = vim.uv or vim.loop
 local stop_dir = vim.env.HOME
@@ -61,15 +77,35 @@ local function package_manager_exec()
   return "npx"
 end
 
+--- neotest-jest / neotest-vitest `__call(_, opts)` indexes `opts` immediately. A bare
+--- `require("neotest-vitest")()` (no table) passes nil and breaks neotest's `config`, so
+--- `setup` never runs and `require("neotest").run` stays nil. Default opts once.
+local function patch_adapter_default_opts(modname)
+  local mod = require(modname)
+  local mt = getmetatable(mod)
+  if not (mt and mt.__call) or mt.__neotest_opts_patched then
+    return mod
+  end
+  local orig = mt.__call
+  mt.__call = function(t, opts)
+    return orig(t, opts or {})
+  end
+  mt.__neotest_opts_patched = true
+  return mod
+end
+
 local function ensure_neotest()
   local lazy_ok, lazy = pcall(require, "lazy")
   if lazy_ok and lazy.load then
-    lazy.load({ plugins = { NEOTEST_PLUGIN } })
+    local id = neotest_lazy_plugin_id()
+    if id then
+      lazy.load({ plugins = { id } })
+    end
   end
   local nt = require("neotest")
   if nt.run == nil then
     vim.notify(
-      "Neotest no está listo (setup no corrió o falló). Revisa :messages y :Lazy.",
+      "Neotest is not ready (setup did not run or failed). Check :messages and :Lazy.",
       vim.log.levels.ERROR
     )
     return nil
@@ -133,7 +169,7 @@ return {
     local adapters = {}
 
     local jest_ok, jest_adapter = pcall(function()
-      return require("neotest-jest")({
+      return patch_adapter_default_opts("neotest-jest")({
         jestCommand = function()
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
@@ -141,7 +177,7 @@ return {
           end
           return prefix .. " jest"
         end,
-        env = { CI = "true" },
+        env = { CI = "true", NODE_ENV = "test" },
         cwd = function()
           return js_project_root()
         end,
@@ -154,7 +190,7 @@ return {
     end
 
     local vitest_ok, vitest_adapter = pcall(function()
-      return require("neotest-vitest")({
+      return patch_adapter_default_opts("neotest-vitest")({
         vitestCommand = function()
           local prefix = package_manager_exec()
           if prefix == "yarn exec" then
@@ -165,6 +201,7 @@ return {
           end
           return prefix .. " vitest run"
         end,
+        env = { CI = "true", NODE_ENV = "test" },
         cwd = function()
           return js_project_root()
         end,
@@ -184,7 +221,7 @@ return {
       },
     })
     if not setup_ok then
-      vim.notify("neotest.setup falló: " .. tostring(setup_err), vim.log.levels.ERROR)
+      vim.notify("neotest.setup failed: " .. tostring(setup_err), vim.log.levels.ERROR)
     end
   end,
 }

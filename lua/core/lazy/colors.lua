@@ -207,7 +207,7 @@ return {
       require("nordic").setup({
         transparent = {
           bg = false,
-          float = false,
+          float = true,
         },
         italic_comments = true,
         reduced_blue = true,

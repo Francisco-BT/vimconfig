@@ -109,36 +109,10 @@ local function set_colorcolumn_hl()
   vim.api.nvim_set_hl(0, "ColorColumn", { bg = rgb_to_hex(r, g, b), force = true })
 end
 
-local function set_blink_menu_highlights()
-  local accent = "#d4a373"
-  local menu_bg = "#1f1f1f"
-  local sel_bg = "#333333"
-  local sel_fg = "#5eacd3"
-
-  vim.api.nvim_set_hl(0, "Pmenu", { bg = menu_bg, fg = "NONE", force = true })
-  vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu", force = true })
-
-  vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", {
-    bg = sel_bg,
-    fg = sel_fg,
-    bold = true,
-    nocombine = true,
-    force = true,
-  })
-  vim.api.nvim_set_hl(0, "PmenuSel", { bg = sel_bg, fg = sel_fg, bold = true, force = true })
-
-  vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = accent, bold = true, force = true })
-
-  vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { fg = accent, force = true })
-
-  set_colorcolumn_hl()
-end
-
-vim.schedule(set_blink_menu_highlights)
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",
   group = MineGroup,
   callback = function()
-    vim.schedule(set_blink_menu_highlights)
+    vim.schedule(set_colorcolumn_hl)
   end,
 })

@@ -23,6 +23,10 @@ local THEME_CHOICES = {
   "dracula_pro",
   "gruvbox",
   "rose-pine",
+  "catppuccin-mocha",
+  "onedark",
+  "cyberdream",
+  "nordic",
 }
 
 local function available_themes()
@@ -151,6 +155,62 @@ return {
         overrides = {},
         dim_inactive = false,
         transparent_mode = false,
+      })
+    end,
+  },
+  {
+    "catppuccin/nvim",
+    name = "catppuccin-mocha",
+    priority = 1000,
+    config = function()
+      require("catppuccin").setup({
+        flavour = "mocha",
+        transparent_background = false,
+      })
+    end,
+  },
+  {
+    "navarasu/onedark.nvim",
+    name = "onedark",
+    priority = 1000,
+    config = function()
+      require("onedark").setup({
+        style = "dark",
+        transparent = false,
+        term_colors = true,
+        code_style = {
+          comments = "italic",
+        },
+      })
+    end,
+  },
+  {
+    "scottmckendry/cyberdream.nvim",
+    name = "cyberdream",
+    priority = 1000,
+    config = function()
+      require("cyberdream").setup({
+        variant = "default",
+        transparent = true,
+        italic_comments = true,
+        hide_fillchars = true,
+        borderless_pickers = true,
+        terminal_colors = true,
+      })
+    end,
+  },
+  {
+    "AlexvZyl/nordic.nvim",
+    name = "nordic",
+    priority = 1000,
+    config = function()
+      require("nordic").setup({
+        transparent = {
+          bg = false,
+          float = false,
+        },
+        italic_comments = true,
+        reduced_blue = true,
       })
     end,
   },

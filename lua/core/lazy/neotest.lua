@@ -12,13 +12,15 @@
 --     "jest": {
 --       "command": "doppler run --project qnr-server --config tst -- yarn workspace @sb/server jest",
 --       "env": { "CI": "vscode-jest-tests", "DEBUG": "safebase:*" },
---       "cwd": "apps/server"
+--       "cwd": "apps/server",
+--       "config": "jest.config.ts"
 --     },
 --     "vitest": { "command": "yarn workspace @sb/web vitest run", "env": {}, "cwd": "apps/web" }
 --   }
--- `cwd` is optional; if relative, it is resolved against the directory containing the override file.
--- neotest-jest may call env/command from an async (fast) context: no API buffer reads then; we
--- cache overrides after a normal resolve (e.g. when you use the keymaps) and reuse that snapshot.
+-- `cwd` is relative to the directory containing `.neotest.json`. `config` is relative to that `cwd`
+-- (or to the override file dir if `cwd` is omitted). Both are pre-resolved into the override cache.
+-- neotest-jest may call env/command/config from an async (fast) context: no vim.fn/glob then; we
+-- cache overrides and jest config after a normal resolve (e.g. when you use the keymaps) and reuse.
 
 -- lazy.nvim registers `{"nvim-neotest/neotest", ...}` under the short id `neotest`
 -- (repo name after `/`), not the full GitHub string — so `lazy.load` must use that id.
@@ -92,7 +94,107 @@ local function lockfile_root(from_dir)
   return from_dir
 end
 
-local override_cache = { path = nil, mtime = -1, data = nil, dir = nil, ready = false }
+local override_cache = {
+  path = nil,
+  mtime = -1,
+  data = nil,
+  dir = nil,
+  ready = false,
+  ---@type { jest_cwd?: string, jest_config?: string, vitest_cwd?: string }|nil
+  resolved = nil,
+}
+local jest_config_cache = { key = nil, value = nil }
+
+--- libuv-only (safe in nvim-nio fast events). neotest-jest's default getJestConfig uses vim.fn.glob.
+local function uv_path_stat(path)
+  return uv.fs_stat(path)
+end
+
+local function uv_is_file(path)
+  local stat = uv_path_stat(path)
+  return stat ~= nil and stat.type == "file"
+end
+
+local function uv_is_dir(path)
+  local stat = uv_path_stat(path)
+  return stat ~= nil and stat.type == "directory"
+end
+
+local function uv_parent_dir(dir)
+  if not dir or dir == "" or dir == "/" then
+    return nil
+  end
+  local parent = dir:gsub("/+$", ""):match("^(.*)/[^/]+$")
+  if not parent or parent == dir then
+    return nil
+  end
+  return parent
+end
+
+local function jest_search_start(path)
+  if not path or path == "" then
+    return uv.cwd()
+  end
+  path = path:gsub("/+$", "")
+  if uv_is_file(path) then
+    return path:match("^(.*)/[^/]+$") or uv.cwd()
+  end
+  if uv_is_dir(path) then
+    return path
+  end
+  return path:match("^(.*)/[^/]+$") or uv.cwd()
+end
+
+--- Walk up from `path` for jest.config.{ts,js,mjs,cjs} (same order as neotest-jest).
+local function find_jest_config_file(path)
+  local dir = jest_search_start(path)
+  local guard = 100
+  while dir and guard > 0 do
+    guard = guard - 1
+    for _, name in ipairs({ "jest.config.ts", "jest.config.js", "jest.config.mjs", "jest.config.cjs" }) do
+      local candidate = joinpath(dir, name)
+      if uv_is_file(candidate) then
+        return candidate
+      end
+    end
+    if dir == stop_dir then
+      break
+    end
+    dir = uv_parent_dir(dir)
+  end
+  return nil
+end
+
+local function jest_config_from_override()
+  if override_cache.ready and override_cache.resolved and override_cache.resolved.jest_config then
+    return override_cache.resolved.jest_config
+  end
+  return nil
+end
+
+local function jest_config_for(path)
+  local key = path or ""
+  local from_override = jest_config_from_override()
+  if from_override then
+    jest_config_cache.key = key
+    jest_config_cache.value = from_override
+    return from_override
+  end
+  if vim.in_fast_event() then
+    if jest_config_cache.key == key and jest_config_cache.value then
+      return jest_config_cache.value
+    end
+    return jest_config_cache.value or "jest.config.js"
+  end
+  local search_from = path
+  if override_cache.resolved and override_cache.resolved.jest_cwd then
+    search_from = override_cache.resolved.jest_cwd
+  end
+  local found = find_jest_config_file(search_from) or "jest.config.js"
+  jest_config_cache.key = key
+  jest_config_cache.value = found
+  return found
+end
 
 local function js_project_root()
   if vim.in_fast_event() then
@@ -155,6 +257,7 @@ local function load_neotest_overrides()
   local path = find_neotest_override_path()
   if not path then
     override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = nil, -1, {}, nil
+    override_cache.resolved = {}
     override_cache.ready = true
     return { data = {}, dir = nil }
   end
@@ -172,6 +275,7 @@ local function load_neotest_overrides()
   end
   local dir = vim.fn.fnamemodify(path, ":p:h")
   override_cache.path, override_cache.mtime, override_cache.data, override_cache.dir = path, mtime, data, dir
+  refresh_override_resolved_paths(data, dir)
   override_cache.ready = true
   return { data = data, dir = dir }
 end
@@ -184,6 +288,50 @@ local function resolve_override_cwd(override_dir, cwd_spec)
     return vim.fn.fnamemodify(cwd_spec, ":p")
   end
   return vim.fn.fnamemodify(joinpath(override_dir, cwd_spec), ":p")
+end
+
+--- Relative paths resolve against `base_dir` (usually override `cwd`, else `.neotest.json` dir).
+local function resolve_override_path(override_dir, base_dir, path_spec)
+  if type(path_spec) ~= "string" or path_spec == "" then
+    return nil
+  end
+  local spec = str_trim(path_spec)
+  if spec == "" then
+    return nil
+  end
+  if vim.startswith(spec, "/") then
+    return vim.fn.fnamemodify(spec, ":p")
+  end
+  local base = base_dir or override_dir
+  if not base then
+    return nil
+  end
+  return vim.fn.fnamemodify(joinpath(base, spec), ":p")
+end
+
+--- Pre-resolve monorepo `cwd` / `jest.config` so async neotest-jest never calls vim.fn for them.
+local function refresh_override_resolved_paths(data, override_dir)
+  override_cache.resolved = {}
+  if not override_dir then
+    return
+  end
+  local jest = type(data.jest) == "table" and data.jest or {}
+  local jest_cwd = type(jest.cwd) == "string" and resolve_override_cwd(override_dir, jest.cwd) or nil
+  if jest_cwd then
+    override_cache.resolved.jest_cwd = jest_cwd
+  end
+  if type(jest.config) == "string" then
+    override_cache.resolved.jest_config = resolve_override_path(
+      override_dir,
+      jest_cwd or override_dir,
+      jest.config
+    )
+  end
+  local vitest = type(data.vitest) == "table" and data.vitest or {}
+  local vitest_cwd = type(vitest.cwd) == "string" and resolve_override_cwd(override_dir, vitest.cwd) or nil
+  if vitest_cwd then
+    override_cache.resolved.vitest_cwd = vitest_cwd
+  end
 end
 
 local DEFAULT_TEST_ENV = { CI = "true", NODE_ENV = "test" }
@@ -234,6 +382,10 @@ end
 
 --- @param section `"jest"` | `"vitest"`
 local function adapter_cwd_from_config(section)
+  local resolved_key = section .. "_cwd"
+  if override_cache.ready and override_cache.resolved and override_cache.resolved[resolved_key] then
+    return override_cache.resolved[resolved_key]
+  end
   local loaded = load_neotest_overrides()
   local block = loaded.data[section]
   if type(block) == "table" and type(block.cwd) == "string" then
@@ -277,6 +429,8 @@ local function ensure_neotest()
   local nt = require("neotest")
   if not vim.in_fast_event() then
     pcall(load_neotest_overrides)
+    local buf = vim.api.nvim_buf_get_name(0)
+    pcall(jest_config_for, (buf ~= "" and buf) or uv.cwd())
   end
   if nt.run == nil then
     vim.notify(
@@ -355,6 +509,9 @@ return {
     end
 
     try_adapter("neotest-jest", "neotest-jest", {
+      jestConfigFile = function(path)
+        return jest_config_for(path)
+      end,
       jestCommand = function()
         return override_command_from_config("jest") or default_jest_command()
       end,

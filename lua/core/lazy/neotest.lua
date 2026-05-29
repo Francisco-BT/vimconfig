@@ -479,6 +479,12 @@ local function open_output()
   end)
 end
 
+local function cancel_run()
+  with_neotest(function(nt)
+    nt.run.stop()
+  end)
+end
+
 return {
   "nvim-neotest/neotest",
   lazy = true,
@@ -495,6 +501,7 @@ return {
     { "<leader>ts", run_cwd, desc = "Neotest: all tests (package)" },
     { "<leader>tv", toggle_summary, desc = "Neotest: toggle summary" },
     { "<leader>to", open_output, desc = "Neotest: output" },
+    { "<leader>tc", cancel_run, desc = "Neotest: cancel run" },
   },
   config = function()
     local adapters = {}

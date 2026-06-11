@@ -1,4 +1,6 @@
 local DEFAULT_THEME = "base16-dracula"
+local GHOSTTY_THEME_LIGHT = "DraculaAlucard"
+local GHOSTTY_THEME_DARK = "DraculaPro"
 
 local function dracula_pro_dir()
   return vim.fn.stdpath("data") .. "/site/pack/themes/start/dracula_pro"
@@ -27,10 +29,7 @@ end
 
 local function apply_solarized(background)
   vim.o.background = background
-  -- :colorscheme runs ghostty-mirror's ColorSchemePre, which forces dark before
-  -- solarized reads vim.o.background. Load directly, then notify mirror.
-  require("solarized").load()
-  vim.api.nvim_exec_autocmds("ColorScheme", { pattern = "solarized", modeline = false })
+  vim.cmd.colorscheme("solarized")
 end
 
 local THEMES ---@type ThemeEntry[]
@@ -117,17 +116,14 @@ local function pick_random_theme(pool)
   return candidates[math.random(#candidates)]
 end
 
-local function sync_ghostty()
-  vim.schedule(function()
-    local ok, mirror = pcall(require, "ghostty-mirror")
-    if not ok or not mirror.push then
-      return
-    end
-    local scheme = mirror.current_scheme and mirror.current_scheme() or vim.g.colors_name
-    if scheme and scheme ~= "" then
-      mirror.push(scheme)
-    end
-  end)
+local function sync_ghostty_appearance(bg)
+  if vim.fn.has("unix") ~= 1 then
+    return
+  end
+  local name = bg == "light" and GHOSTTY_THEME_LIGHT or GHOSTTY_THEME_DARK
+  local path = vim.fn.expand("~/.config/ghostty/theme-current")
+  vim.fn.writefile({ "theme = " .. name }, path)
+  vim.system({ "pkill", "-SIGUSR2", "ghostty" }, { detach = true })
 end
 
 local function set_theme(id)
@@ -141,7 +137,7 @@ local function set_theme(id)
     return
   end
   theme.apply()
-  sync_ghostty()
+  sync_ghostty_appearance(theme.bg)
 end
 
 -- TODO: Add a command to toggle the transparent background

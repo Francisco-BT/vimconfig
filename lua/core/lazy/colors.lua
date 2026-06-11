@@ -116,6 +116,8 @@ local function pick_random_theme(pool)
   return candidates[math.random(#candidates)]
 end
 
+local TMUX_THEMES_DIR = vim.fn.expand("~/.config/tmux/themes")
+
 local function sync_ghostty_appearance(bg)
   if vim.fn.has("unix") ~= 1 then
     return
@@ -124,6 +126,21 @@ local function sync_ghostty_appearance(bg)
   local path = vim.fn.expand("~/.config/ghostty/theme-current")
   vim.fn.writefile({ "theme = " .. name }, path)
   vim.system({ "pkill", "-SIGUSR2", "ghostty" }, { detach = true })
+end
+
+local function sync_tmux_appearance(bg)
+  if vim.fn.has("unix") ~= 1 then
+    return
+  end
+  local theme_file = bg == "light" and "light.conf" or "dark.conf"
+  local current = vim.fn.expand("~/.config/tmux/theme-current.conf")
+  vim.fn.writefile({ 'source-file "' .. TMUX_THEMES_DIR .. "/" .. theme_file .. '"' }, current)
+  vim.system({ "tmux", "source-file", current }, { detach = true })
+end
+
+local function sync_terminal_appearance(bg)
+  sync_ghostty_appearance(bg)
+  sync_tmux_appearance(bg)
 end
 
 local function set_theme(id)
@@ -137,7 +154,7 @@ local function set_theme(id)
     return
   end
   theme.apply()
-  sync_ghostty_appearance(theme.bg)
+  sync_terminal_appearance(theme.bg)
 end
 
 -- TODO: Add a command to toggle the transparent background

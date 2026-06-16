@@ -8,7 +8,7 @@ autocmd("TextYankPost", {
   group = yank_group,
   pattern = "*",
   callback = function()
-    vim.highlight.on_yank({
+    vim.hl.on_yank({
       higroup = "IncSearch",
       timeout = 40,
     })
@@ -25,6 +25,11 @@ autocmd({ "BufWritePre" }, {
 autocmd("LspAttach", {
   group = MineGroup,
   callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client then
+      require("core.lang.lsp").on_attach(ev, client)
+    end
+
     -- Helper for shorter descriptions
     local function opts(desc)
       return { buffer = ev.buf, desc = "LSP: " .. desc }

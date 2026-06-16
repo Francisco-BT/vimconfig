@@ -1,39 +1,22 @@
-local biome_config_names = {
-  "biome.json",
-  "biome.jsonc",
-  ".biome.json",
-  ".biome.jsonc",
-}
+local WebLang = require("core.lang.web")
+local DockerConfig = require("core.lang.docker")
 
-local function has_biome_config(ctx)
-  return vim.fs.find(biome_config_names, { path = ctx.filename, upward = true })[1] ~= nil
-end
-
-local js_ts_formatters = { "biome-check", "prettierd", stop_after_first = true }
+local formatters_by_ft = vim.tbl_deep_extend("force", {}, WebLang.formatters_by_ft, DockerConfig.formatters_by_ft, {
+  lua = { "stylua" },
+  prisma = { "prismaFmt" },
+})
 
 return {
   "stevearc/conform.nvim",
   event = { "BufReadPost", "BufWritePre" },
   cmd = { "ConformInfo" },
   opts = {
-    formatters_by_ft = {
-      javascript = js_ts_formatters,
-      typescript = js_ts_formatters,
-      javascriptreact = js_ts_formatters,
-      typescriptreact = js_ts_formatters,
-      lua = { "stylua" },
-      prisma = { "prismaFmt" },
-    },
-    formatters = {
-      ["biome-check"] = {
-        condition = function(_, ctx)
-          return has_biome_config(ctx)
-        end,
-      },
+    formatters_by_ft = formatters_by_ft,
+    formatters = vim.tbl_extend("force", {}, WebLang.formatters, {
       stylua = {
         prepend_args = { "--indent-type", "Spaces", "--indent-width", "2" },
       },
-    },
+    }),
     -- A plain table ignores vim.g/b.disable_autoformat; use a function (see :h conform.nvim recipes)
     format_on_save = function(bufnr)
       if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then

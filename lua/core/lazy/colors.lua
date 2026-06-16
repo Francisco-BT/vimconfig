@@ -19,26 +19,58 @@ local function read_macos_appearance_pool()
   return "light"
 end
 
----@class ThemeEntry
----@field id string
----@field bg "light"|"dark"
----@field available? fun(): boolean
----@field apply fun()
-
 local function apply_solarized(background)
   vim.o.background = background
   vim.cmd.colorscheme("solarized")
 end
 
-local THEMES ---@type ThemeEntry[]
-THEMES = {
-  { id = "base16-dracula", bg = "dark", apply = function() vim.cmd.colorscheme("base16-dracula") end },
-  { id = "kanagawa", bg = "dark", apply = function() vim.cmd.colorscheme("kanagawa") end },
-  { id = "night-owl", bg = "dark", apply = function() vim.cmd.colorscheme("night-owl") end },
-  { id = "oxocarbon", bg = "dark", apply = function() vim.cmd.colorscheme("oxocarbon") end },
+---@class ThemeEntry
+---@field id string
+---@field bg "light"|"dark"
+---@field lazy_plugin string lazy.nvim plugin id to load before apply
+---@field eager? boolean load at startup (only the default theme)
+---@field available? fun(): boolean
+---@field apply fun()
+
+---@type ThemeEntry[]
+local THEMES = {
+  {
+    id = DEFAULT_THEME,
+    bg = "dark",
+    lazy_plugin = DEFAULT_THEME,
+    eager = true,
+    apply = function()
+      vim.cmd.colorscheme(DEFAULT_THEME)
+    end,
+  },
+  {
+    id = "kanagawa",
+    bg = "dark",
+    lazy_plugin = "kanagawa",
+    apply = function()
+      vim.cmd.colorscheme("kanagawa")
+    end,
+  },
+  {
+    id = "night-owl",
+    bg = "dark",
+    lazy_plugin = "night-owl",
+    apply = function()
+      vim.cmd.colorscheme("night-owl")
+    end,
+  },
+  {
+    id = "oxocarbon",
+    bg = "dark",
+    lazy_plugin = "oxocarbon",
+    apply = function()
+      vim.cmd.colorscheme("oxocarbon")
+    end,
+  },
   {
     id = "dracula_pro",
     bg = "dark",
+    lazy_plugin = "dracula_pro",
     available = dracula_pro_available,
     apply = function()
       vim.cmd.colorscheme("dracula_pro")
@@ -47,21 +79,72 @@ THEMES = {
   {
     id = "dracula_alucard",
     bg = "light",
+    lazy_plugin = "dracula_pro",
     available = dracula_pro_available,
     apply = function()
       vim.cmd.colorscheme("dracula_pro_alucard")
     end,
   },
-  { id = "gruvbox", bg = "dark", apply = function() vim.cmd.colorscheme("gruvbox") end },
-  { id = "rose-pine-moon", bg = "dark", apply = function() vim.cmd.colorscheme("rose-pine-moon") end },
-  { id = "rose-pine-dawn", bg = "light", apply = function() vim.cmd.colorscheme("rose-pine-dawn") end },
-  { id = "catppuccin-mocha", bg = "dark", apply = function() vim.cmd.colorscheme("catppuccin") end },
-  { id = "onedark", bg = "dark", apply = function() vim.cmd.colorscheme("onedark") end },
-  { id = "cyberdream", bg = "dark", apply = function() vim.cmd.colorscheme("cyberdream") end },
-  { id = "nordic", bg = "dark", apply = function() vim.cmd.colorscheme("nordic") end },
+  {
+    id = "gruvbox",
+    bg = "dark",
+    lazy_plugin = "gruvbox",
+    apply = function()
+      vim.cmd.colorscheme("gruvbox")
+    end,
+  },
+  {
+    id = "rose-pine-moon",
+    bg = "dark",
+    lazy_plugin = "rose-pine",
+    apply = function()
+      vim.cmd.colorscheme("rose-pine-moon")
+    end,
+  },
+  {
+    id = "rose-pine-dawn",
+    bg = "light",
+    lazy_plugin = "rose-pine",
+    apply = function()
+      vim.cmd.colorscheme("rose-pine-dawn")
+    end,
+  },
+  {
+    id = "catppuccin-mocha",
+    bg = "dark",
+    lazy_plugin = "catppuccin-mocha",
+    apply = function()
+      vim.cmd.colorscheme("catppuccin")
+    end,
+  },
+  {
+    id = "onedark",
+    bg = "dark",
+    lazy_plugin = "onedark",
+    apply = function()
+      vim.cmd.colorscheme("onedark")
+    end,
+  },
+  {
+    id = "cyberdream",
+    bg = "dark",
+    lazy_plugin = "cyberdream",
+    apply = function()
+      vim.cmd.colorscheme("cyberdream")
+    end,
+  },
+  {
+    id = "nordic",
+    bg = "dark",
+    lazy_plugin = "nordic",
+    apply = function()
+      vim.cmd.colorscheme("nordic")
+    end,
+  },
   {
     id = "solarized-dark",
     bg = "dark",
+    lazy_plugin = "solarized",
     apply = function()
       apply_solarized("dark")
     end,
@@ -69,6 +152,7 @@ THEMES = {
   {
     id = "solarized-light",
     bg = "light",
+    lazy_plugin = "solarized",
     apply = function()
       apply_solarized("light")
     end,
@@ -114,6 +198,18 @@ local function pick_random_theme(pool)
   return candidates[math.random(#candidates)]
 end
 
+local function ensure_theme_loaded(theme)
+  if theme.eager then
+    return true
+  end
+  local ok, lazy = pcall(require, "lazy")
+  if not ok then
+    return true
+  end
+  lazy.load({ plugins = { theme.lazy_plugin } })
+  return true
+end
+
 local function set_theme(id)
   local theme = theme_by_id(id)
   if not theme then
@@ -124,10 +220,10 @@ local function set_theme(id)
     vim.notify("Theme not available: " .. id, vim.log.levels.WARN)
     return
   end
+  ensure_theme_loaded(theme)
   theme.apply()
 end
 
--- TODO: Add a command to toggle the transparent background
 vim.api.nvim_create_user_command("Theme", function(cmd)
   local name = cmd.args ~= "" and cmd.args or DEFAULT_THEME
   set_theme(name)
@@ -150,13 +246,13 @@ vim.api.nvim_create_autocmd("User", {
 return {
   {
     "Francisco-BT/base16-dracula",
-    name = "base16-dracula",
+    name = DEFAULT_THEME,
     priority = 1000,
   },
   {
     "rebelot/kanagawa.nvim",
     name = "kanagawa",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("kanagawa").setup({
         transparent = false,
@@ -170,7 +266,7 @@ return {
   {
     dir = dracula_pro_dir(),
     name = "dracula_pro",
-    priority = 1000,
+    lazy = true,
     cond = function()
       return dracula_pro_available()
     end,
@@ -181,17 +277,17 @@ return {
   {
     "haishanh/night-owl.vim",
     name = "night-owl",
-    priority = 1000,
+    lazy = true,
   },
   {
     "nyoom-engineering/oxocarbon.nvim",
     name = "oxocarbon",
-    priority = 1000,
+    lazy = true,
   },
   {
     "rose-pine/neovim",
     name = "rose-pine",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("rose-pine").setup({
         disable_background = false,
@@ -204,7 +300,7 @@ return {
   {
     "maxmx03/solarized.nvim",
     name = "solarized",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("solarized").setup({
         transparent = {
@@ -216,7 +312,7 @@ return {
   {
     "ellisonleao/gruvbox.nvim",
     name = "gruvbox",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("gruvbox").setup({
         terminal_colors = true,
@@ -247,7 +343,7 @@ return {
   {
     "catppuccin/nvim",
     name = "catppuccin-mocha",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("catppuccin").setup({
         flavour = "mocha",
@@ -258,7 +354,7 @@ return {
   {
     "navarasu/onedark.nvim",
     name = "onedark",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("onedark").setup({
         style = "dark",
@@ -273,7 +369,7 @@ return {
   {
     "scottmckendry/cyberdream.nvim",
     name = "cyberdream",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("cyberdream").setup({
         variant = "default",
@@ -288,7 +384,7 @@ return {
   {
     "AlexvZyl/nordic.nvim",
     name = "nordic",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("nordic").setup({
         transparent = {

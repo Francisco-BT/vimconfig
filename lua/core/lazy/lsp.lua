@@ -1,3 +1,5 @@
+local WebLang = require("core.lang.web")
+
 return {
   "neovim/nvim-lspconfig",
   dependencies = {
@@ -42,23 +44,7 @@ return {
     })
 
     local server_configs = {
-      vtsls = {
-        settings = {
-          experimental = {
-            maxInlayHintLength = 30,
-          },
-          typescript = {
-            tsserver = {
-              maxTsServerMemory = 8192,
-            },
-          },
-          javascript = {
-            tsserver = {
-              maxTsServerMemory = 8192,
-            },
-          },
-        },
-      },
+      vtsls = WebLang.vtsls_config(),
       lua_ls = {
         settings = {
           Lua = {
@@ -68,20 +54,7 @@ return {
           },
         },
       },
-      tailwindcss = {
-        filetypes = {
-          "html",
-          "css",
-          "scss",
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact",
-          "vue",
-          "svelte",
-          "heex",
-        },
-      },
+      tailwindcss = WebLang.tailwindcss_config(),
     }
 
     for server_name, config in pairs(server_configs) do
@@ -89,16 +62,6 @@ return {
       vim.lsp.config(server_name, config)
     end
 
-    vim.diagnostic.config({
-      -- update_in_insert = true,
-      float = {
-        focusable = false,
-        style = "minimal",
-        border = "rounded",
-        source = "always",
-        header = "",
-        prefix = "",
-      },
-    })
+    WebLang.setup_keymaps()
   end,
 }

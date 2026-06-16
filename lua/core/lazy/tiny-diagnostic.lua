@@ -15,10 +15,18 @@ return {
     })
 
     vim.diagnostic.config({
-      virtual_text = false, -- Disable the default plain text on the right
-      underline = true, -- Keep the colored underlines (red/yellow) under the code
-      signs = true, -- Keep the icons (E, W, H) in the gutter/sign column
-      update_in_insert = false, -- Don't annoy us while we are still typing
+      virtual_text = false, -- tiny-inline-diagnostic renders inline instead
+      underline = true,
+      signs = true,
+      update_in_insert = false,
+      float = {
+        focusable = false,
+        style = "minimal",
+        border = "rounded",
+        source = "always",
+        header = "",
+        prefix = "",
+      },
     })
   end,
 }

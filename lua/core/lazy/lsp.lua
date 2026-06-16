@@ -32,6 +32,7 @@ return {
       "lua_ls",
       "vtsls",
       "eslint",
+      "biome",
       "tailwindcss",
       "prismals",
     }

@@ -1,17 +1,35 @@
+local biome_config_names = {
+  "biome.json",
+  "biome.jsonc",
+  ".biome.json",
+  ".biome.jsonc",
+}
+
+local function has_biome_config(ctx)
+  return vim.fs.find(biome_config_names, { path = ctx.filename, upward = true })[1] ~= nil
+end
+
+local js_ts_formatters = { "biome-check", "prettierd", stop_after_first = true }
+
 return {
   "stevearc/conform.nvim",
   event = { "BufReadPost", "BufWritePre" },
   cmd = { "ConformInfo" },
   opts = {
     formatters_by_ft = {
-      javascript = { "prettierd" },
-      typescript = { "prettierd" },
-      javascriptreact = { "prettierd" },
-      typescriptreact = { "prettierd" },
+      javascript = js_ts_formatters,
+      typescript = js_ts_formatters,
+      javascriptreact = js_ts_formatters,
+      typescriptreact = js_ts_formatters,
       lua = { "stylua" },
       prisma = { "prismaFmt" },
     },
     formatters = {
+      ["biome-check"] = {
+        condition = function(_, ctx)
+          return has_biome_config(ctx)
+        end,
+      },
       stylua = {
         prepend_args = { "--indent-type", "Spaces", "--indent-width", "2" },
       },

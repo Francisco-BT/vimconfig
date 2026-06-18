@@ -37,6 +37,7 @@ return {
       "biome",
       "tailwindcss",
       "prismals",
+      "codebook",
     }
     mason_lspconfig.setup({
       ensure_installed = servers,
@@ -55,6 +56,11 @@ return {
         },
       },
       tailwindcss = WebLang.tailwindcss_config(),
+      codebook = {
+        init_options = {
+          diagnosticSeverity = "hint",
+        },
+      },
     }
 
     for server_name, config in pairs(server_configs) do

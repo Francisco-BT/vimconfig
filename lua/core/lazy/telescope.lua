@@ -11,14 +11,22 @@ return {
     local builtin = require("telescope.builtin")
     local workspace = require("core.lang.workspace")
 
-    local heavy_ignore_patterns = workspace.heavy_ignore_patterns()
-
+    --- VS Code-style quick open: project root, includes gitignored (.env, localdev.yml, …).
     local function quick_open_files()
       builtin.find_files({
         cwd = workspace.cwd(),
+        hidden = true,
+        no_ignore = true,
         prompt_title = "Go to File",
-        find_command = workspace.quick_open_find_command(),
-        file_ignore_patterns = heavy_ignore_patterns,
+        file_ignore_patterns = workspace.quick_open_ignore_patterns,
+      })
+    end
+
+    --- Stricter file search: same project root, respects .gitignore.
+    local function find_project_files()
+      builtin.find_files({
+        cwd = workspace.cwd(),
+        prompt_title = "Find Files",
       })
     end
 
@@ -26,7 +34,7 @@ return {
       defaults = {
         path_display = { "filename_first" },
         wrap_results = true,
-        file_ignore_patterns = heavy_ignore_patterns,
+        file_ignore_patterns = workspace.default_ignore_patterns,
         preview = { hide_on_startup = false },
         layout_config = {
           horizontal = {
@@ -53,12 +61,7 @@ return {
 
     vim.keymap.set("n", "<C-p>", quick_open_files, { desc = "Quick open file (incl. gitignored)" })
 
-    vim.keymap.set("n", "<leader>pf", function()
-      builtin.find_files({
-        cwd = workspace.cwd(),
-        prompt_title = "Find Files",
-      })
-    end, { desc = "Telescope find files (respect .gitignore)" })
+    vim.keymap.set("n", "<leader>pf", find_project_files, { desc = "Telescope find files (respect .gitignore)" })
 
     vim.keymap.set("n", "<leader>pb", function()
       builtin.buffers({ sort_mru = true })
@@ -86,5 +89,12 @@ return {
     vim.keymap.set({ "n", "v" }, "<leader>vca", vim.lsp.buf.code_action, {
       desc = "LSP code actions",
     })
+
+    vim.api.nvim_create_user_command("TelescopeRoot", function()
+      vim.notify(
+        ("Telescope workspace root: %s\nShell cwd: %s"):format(workspace.cwd(), vim.loop.cwd()),
+        vim.log.levels.INFO
+      )
+    end, { desc = "Show workspace root vs shell cwd" })
   end,
 }

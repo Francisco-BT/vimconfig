@@ -1,8 +1,6 @@
 local Workspace = {}
 
---- Project root markers (first match walking up from the buffer path).
-Workspace.root_markers = {
-  ".git",
+Workspace.fallback_root_markers = {
   "package.json",
   "pnpm-workspace.yaml",
   "pyproject.toml",
@@ -17,45 +15,54 @@ Workspace.root_markers = {
   "Makefile",
 }
 
---- Heavy directories: excluded from quick-open even when .gitignore is bypassed.
-Workspace.heavy_dirs = {
-  ".git",
+--- Patterns for quick-open when using no_ignore (rg/fd list gitignored files too).
+Workspace.quick_open_ignore_patterns = {
   "node_modules",
-  ".venv",
-  ".cache",
-  "dist",
-  "build",
-  ".next",
-  "coverage",
-  "target",
-  "vendor",
+  "%.git/",
+  "%.cache/",
+  "/dist/",
+  "/build/",
+  "%.next/",
+  "/coverage/",
+  "/target/",
+  "/vendor/",
   "__pycache__",
-  ".tox",
-  ".godot",
+  "%.tox/",
+  "%.godot/",
 }
 
-local function dir_to_ignore_pattern(dir)
-  if vim.startswith(dir, ".") then
-    return "%" .. dir:gsub("%.", "%%.") .. "/"
-  end
-  return dir .. "/"
+Workspace.default_ignore_patterns = {
+  "node_modules",
+  "%.git/",
+}
+
+local function is_real_path(path)
+  return type(path) == "string" and path ~= "" and not path:match("^[%w%+%-]+://")
 end
 
-function Workspace.heavy_ignore_patterns()
-  local patterns = {}
-  for _, dir in ipairs(Workspace.heavy_dirs) do
-    patterns[#patterns + 1] = dir_to_ignore_pattern(dir)
+---@param path string
+---@return string
+local function search_start(path)
+  if not is_real_path(path) then
+    return vim.loop.cwd()
   end
-  return patterns
+  local stat = vim.loop.fs_stat(path)
+  if stat and stat.type == "file" then
+    return vim.fs.dirname(path)
+  end
+  return path
 end
 
-function Workspace.quick_open_find_command()
-  local cmd = { "fd", "--type", "f", "--hidden", "--no-ignore-vcs" }
-  for _, dir in ipairs(Workspace.heavy_dirs) do
-    cmd[#cmd + 1] = "--exclude"
-    cmd[#cmd + 1] = dir
+--- Git root; handles .git as file (worktrees) or directory.
+---@param path string
+---@return string|nil
+local function git_root(path)
+  local start = search_start(path)
+  local git_marker = vim.fs.find(".git", { path = start, upward = true })[1]
+  if git_marker then
+    return vim.fs.dirname(git_marker)
   end
-  return cmd
+  return nil
 end
 
 ---@param path string|nil
@@ -64,17 +71,41 @@ function Workspace.cwd_from_path(path)
   if not path or path == "" then
     path = vim.loop.cwd()
   end
-  return vim.fs.root(path, Workspace.root_markers) or vim.loop.cwd()
+
+  if not is_real_path(path) then
+    return vim.loop.cwd()
+  end
+
+  local root = git_root(path)
+  if root then
+    return root
+  end
+
+  local fallback = vim.fs.root(search_start(path), Workspace.fallback_root_markers)
+  if fallback then
+    return fallback
+  end
+
+  return vim.loop.cwd()
 end
 
---- Workspace root for the current buffer.
+---@param root string
+---@return string
+local function ensure_dir(root)
+  if vim.loop.fs_stat(root) then
+    return root
+  end
+  return vim.loop.cwd()
+end
+
+--- Project root for the current buffer (git root, else markers, else shell cwd).
 ---@return string
 function Workspace.cwd()
   local path = vim.api.nvim_buf_get_name(0)
   if path == "" then
-    return Workspace.cwd_from_path(vim.loop.cwd())
+    return ensure_dir(Workspace.cwd_from_path(vim.loop.cwd()))
   end
-  return Workspace.cwd_from_path(path)
+  return ensure_dir(Workspace.cwd_from_path(path))
 end
 
 return Workspace

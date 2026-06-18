@@ -11,14 +11,14 @@ return {
     local builtin = require("telescope.builtin")
     local workspace = require("core.lang.workspace")
 
-    --- VS Code-style quick open: project root, includes gitignored (.env, localdev.yml, …).
+    --- Quick open (VS Code / Cursor Cmd+P): hidden + gitignored files, minus noisy dirs.
     local function quick_open_files()
       builtin.find_files({
         cwd = workspace.cwd(),
         hidden = true,
         no_ignore = true,
         prompt_title = "Go to File",
-        file_ignore_patterns = workspace.quick_open_ignore_patterns,
+        file_ignore_patterns = workspace.quick_open_exclude_patterns,
       })
     end
 
@@ -59,7 +59,7 @@ return {
 
     require("telescope").load_extension("ui-select")
 
-    vim.keymap.set("n", "<C-p>", quick_open_files, { desc = "Quick open file (incl. gitignored)" })
+    vim.keymap.set("n", "<C-p>", quick_open_files, { desc = "Quick open file (Cmd+P style)", noremap = true })
 
     vim.keymap.set("n", "<leader>pf", find_project_files, { desc = "Telescope find files (respect .gitignore)" })
 

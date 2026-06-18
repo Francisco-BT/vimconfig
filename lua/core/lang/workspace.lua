@@ -15,8 +15,8 @@ Workspace.fallback_root_markers = {
   "Makefile",
 }
 
---- Patterns for quick-open when using no_ignore (rg/fd list gitignored files too).
-Workspace.quick_open_ignore_patterns = {
+--- Quick-open excludes for <C-p> (VS Code / Cursor files.exclude style).
+Workspace.quick_open_exclude_patterns = {
   "node_modules",
   "%.git/",
   "%.cache/",

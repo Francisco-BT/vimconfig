@@ -15,27 +15,6 @@ Workspace.fallback_root_markers = {
   "Makefile",
 }
 
---- Quick-open excludes for <C-p> (VS Code / Cursor files.exclude style).
-Workspace.quick_open_exclude_patterns = {
-  "node_modules",
-  "%.git/",
-  "%.cache/",
-  "/dist/",
-  "/build/",
-  "%.next/",
-  "/coverage/",
-  "/target/",
-  "/vendor/",
-  "__pycache__",
-  "%.tox/",
-  "%.godot/",
-}
-
-Workspace.default_ignore_patterns = {
-  "node_modules",
-  "%.git/",
-}
-
 local function is_real_path(path)
   return type(path) == "string" and path ~= "" and not path:match("^[%w%+%-]+://")
 end
